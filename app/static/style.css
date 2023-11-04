@@ -13,3 +13,52 @@ h1, h2, h3, h4, h5, h6 {
 p {
     font-family: "Open Sans";
 }
+
+.grid-container {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    grid-gap: 100px;
+    padding: 25px;
+}
+
+.claim {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.price {
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+.bio {
+    margin-bottom: 100px;
+}
+
+.picture {
+    text-align: center;
+}
+
+.picture img {
+    border-radius: 20%;
+    height: 300px;
+    width: 300px;
+}
+
+.city {
+    font-size: 1.5em;
+    font-weight: bold;
+    text-align: center;
+}
+
+.phone {
+    font-size: 1.1em;
+    font-weight: bold;
+    text-align: center;
+}
+
+.email {
+    font-size: 1.1em;
+    font-weight: bold;
+    text-align: center;
+}
