@@ -4,6 +4,7 @@
 body {
     background-color: #333333;
     color: #ffffff;
+    margin: auto;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -16,9 +17,9 @@ p {
 
 .grid-container {
     display: grid;
-    grid-template-columns: 2fr 1fr;
+    grid-template-columns: 1fr 2fr;
     grid-gap: 100px;
-    padding: 25px;
+    height: 100vh;
 }
 
 .claim {
@@ -61,4 +62,13 @@ p {
     font-size: 1.1em;
     font-weight: bold;
     text-align: center;
+}
+
+.contacts {
+    background-color: #00384D;
+    border-top-right-radius: 20%;
+}
+
+.logo {
+    width: 5%;
 }
