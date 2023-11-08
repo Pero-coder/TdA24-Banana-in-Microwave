@@ -19,6 +19,11 @@ p {
     display: grid;
     grid-template-columns: 1fr 2fr;
     grid-gap: 100px;
+}
+
+.document {
+    display: grid;
+    grid-template-rows: 1fr 100fr;
     height: 100vh;
 }
 
@@ -66,7 +71,7 @@ p {
 
 .contacts {
     background-color: #00384D;
-    border-top-right-radius: 20%;
+    border-top-right-radius: 10%;
 }
 
 .logo {
