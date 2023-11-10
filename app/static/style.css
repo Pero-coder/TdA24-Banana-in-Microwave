@@ -74,8 +74,6 @@ p {
     border-top-right-radius: 10%;
 }
 
-.logo {
-    width: 70.3px;
-    height: 46.6px;
-    margin: 10px;
+.content {
+    margin-right: 20px;
 }
