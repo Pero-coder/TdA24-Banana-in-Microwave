@@ -17,13 +17,12 @@ p {
 
 .grid-container {
     display: grid;
-    grid-template-columns: 500px 1fr;
-    grid-gap: 100px;
+    grid-template-rows: auto 1fr;
 }
 
 .document {
     display: grid;
-    grid-template-rows: 1fr 100fr;
+    grid-template-rows: 97px auto;
     height: 100vh;
 }
 
@@ -47,8 +46,8 @@ p {
 
 .picture img {
     border-radius: 20%;
-    height: 300px;
-    width: 300px;
+    max-width: 100%;
+    height: auto;
 }
 
 .city {
@@ -72,8 +71,30 @@ p {
 .contacts {
     background-color: #00384D;
     border-top-right-radius: 50px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding-left: 20px;
+    padding-right: 20px;
 }
 
 .content {
+    margin-left: 20px;
     margin-right: 20px;
+}
+
+
+@media only screen and (min-width: 1000px) {
+    .grid-container {
+        grid-template-columns: 500px 1fr;
+        grid-template-rows: 1fr;
+    }
+
+    .contacts {
+        display: inline;
+    }
+
+    .content {
+        margin-left: 50px;
+        margin-right: 50px;
+    }
 }
