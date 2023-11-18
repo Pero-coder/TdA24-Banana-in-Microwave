@@ -62,7 +62,7 @@ def delete_lecturer(uuid):
     if deleted:
         return '', 204
     else:
-        return {"code": 404, "message": "User not found"}
+        return {"code": 404, "message": "User not found"}, 404
 
 if __name__ == '__main__':
     app.jinja_env.auto_reload = True
