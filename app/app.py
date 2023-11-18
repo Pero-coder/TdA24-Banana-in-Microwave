@@ -38,8 +38,12 @@ def api_lecturers():
 
 @app.route("/api/delete/<string:id>", methods=["DELETE"])
 def api_delete(id):
-    deleted_count = lecturers.delete_one({"_id": ObjectId(id)}).deleted_count
-    return {"deleted": bool(deleted_count)}
+    deleted = bool(lecturers.delete_one({"_id": ObjectId(id)}).deleted_count)
+    
+    if deleted:
+        return '', 204
+    else:
+        return {"code": 404, "message": "User not found"}
 
 if __name__ == '__main__':
     app.jinja_env.auto_reload = True
