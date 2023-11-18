@@ -36,6 +36,21 @@ def api_lecturers():
             lecturers.insert_one(new_lecturer)
     return json.loads(json_util.dumps({"lecturers": list(lecturers.find())}))
 
+@app.route("/api/lecturers/<string:uuid>", methods=["GET"])
+def get_specific_lecturer(uuid: str):
+
+    if len(uuid) == 24:
+        found_lecturer = lecturers.find_one({"_id": ObjectId(uuid)})
+    else:
+        found_lecturer = None
+
+    if found_lecturer is None:
+        return {"code": 404, "message": "User not found"}, 404
+    
+    else:
+        return json.loads(json_util.dumps(found_lecturer)), 200
+
+
 @app.route("/api/delete/<string:uuid>", methods=["DELETE"])
 def api_delete(uuid):
     deleted = bool(lecturers.delete_one({"_id": ObjectId(uuid)}).deleted_count)
