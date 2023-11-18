@@ -64,6 +64,21 @@ def delete_lecturer(uuid):
     else:
         return {"code": 404, "message": "User not found"}, 404
 
+@app.route("/api/lecturers/<string:uuid>", methods=["PUT"])
+def update_lecturer(uuid):
+
+    if len(uuid) != 24:
+        return {"code": 404, "message": "User not found"}, 404 
+    
+    updated_json = request.get_json()
+    lecturer_exists = bool(lecturers.find_one({"_id": ObjectId(uuid)}))
+
+    if lecturer_exists:
+        lecturers.update_one({"_id": ObjectId(uuid)}, {"$set": updated_json})
+        return get_specific_lecturer(uuid)
+
+    return {"code": 404, "message": "User not found"}, 404
+
 if __name__ == '__main__':
     app.jinja_env.auto_reload = True
     app.config['TEMPLATES_AUTO_RELOAD'] = True
