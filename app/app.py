@@ -51,8 +51,8 @@ def get_specific_lecturer(uuid: str):
         return json.loads(json_util.dumps(found_lecturer)), 200
 
 
-@app.route("/api/delete/<string:uuid>", methods=["DELETE"])
-def api_delete(uuid):
+@app.route("/api/lecturers/<string:uuid>", methods=["DELETE"])
+def delete_lecturer(uuid):
 
     if len(uuid) == 24:
         deleted = bool(lecturers.delete_one({"_id": ObjectId(uuid)}).deleted_count)
