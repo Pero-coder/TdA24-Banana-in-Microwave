@@ -53,7 +53,11 @@ def get_specific_lecturer(uuid: str):
 
 @app.route("/api/delete/<string:uuid>", methods=["DELETE"])
 def api_delete(uuid):
-    deleted = bool(lecturers.delete_one({"_id": ObjectId(uuid)}).deleted_count)
+
+    if len(uuid) == 24:
+        deleted = bool(lecturers.delete_one({"_id": ObjectId(uuid)}).deleted_count)
+    else:
+        deleted = False
 
     if deleted:
         return '', 204
