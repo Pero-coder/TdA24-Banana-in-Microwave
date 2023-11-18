@@ -1,6 +1,6 @@
 import os
 import json
-from bson import json_util
+from bson import json_util, ObjectId
 from dotenv import load_dotenv
 from flask import Flask, render_template, request
 from pymongo.mongo_client import MongoClient
@@ -36,6 +36,10 @@ def api_lecturers():
             lecturers.insert_one(new_lecturer)
     return json.loads(json_util.dumps({"lecturers": list(lecturers.find())}))
 
+@app.route("/api/delete/<string:id>", methods=["DELETE"])
+def api_delete(id):
+    deleted_count = lecturers.delete_one({"_id": ObjectId(id)}).deleted_count
+    return {"deleted": bool(deleted_count)}
 
 if __name__ == '__main__':
     app.jinja_env.auto_reload = True
