@@ -4,7 +4,7 @@ from typing import Optional, List, Dict, Literal
 
 
 class Lecturer(BaseModel):
-    uuid: str = Field(..., extra={'readOnly': True})
+    uuid: Optional[str] = None
     title_before: Optional[str] = None
     first_name: str
     middle_name: Optional[str] = None
