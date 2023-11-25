@@ -38,10 +38,10 @@ def api_lecturers():
     if request.method == 'POST':
         new_lecturer_json = request.get_json()
         try:
-            new_lecturer_json["_id"] = str(uuid.uuid4())
-
             # Validate by creating lecturer object
             Lecturer(**new_lecturer_json)
+
+            new_lecturer_json["_id"] = str(uuid.uuid4())
             lecturers.insert_one(new_lecturer_json)
 
         except ValidationError as e:
