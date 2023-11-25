@@ -45,7 +45,6 @@ def api_lecturers():
 
         except ValidationError as e:
             # Validation not successfull
-            print(str(e))
             pass
     
     return json.loads(json_util.dumps({"lecturers": list(lecturers.find())}))
