@@ -19,7 +19,7 @@ client = MongoClient(
 app = Flask(__name__)
 db = client.test_database
 lecturers = db.lecturers
-
+tags = db.tags
 
 @app.route("/")
 def hello_world():
