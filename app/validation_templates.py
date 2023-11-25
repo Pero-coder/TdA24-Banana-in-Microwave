@@ -6,7 +6,7 @@ class Tag(BaseModel):
     name: str
 
 class Lecturer(BaseModel):
-    uuid: Optional[str] = None
+    #uuid: Optional[str] = None
     title_before: Optional[str] = None
     first_name: str
     middle_name: Optional[str] = None
@@ -19,3 +19,6 @@ class Lecturer(BaseModel):
     tags: List[Tag] = Field(..., min_items=0, uniqueItems=True)
     price_per_hour: Optional[int] = Field(None, ge=0)
     contact: Dict[Literal["telephone_numbers", "emails"], List[str]] = Field(..., min_items=1, uniqueItems=True)
+
+    class Config:
+        extra = "forbid"
