@@ -37,6 +37,8 @@ def api_lecturers():
     if request.method == 'POST':
         new_lecturer_json = request.get_json()
         try:
+            new_lecturer_json["uuid"] = str(uuid.uuid4())
+
             # Validate by creating lecturer object
             Lecturer(**new_lecturer_json)
             lecturers.insert_one(new_lecturer_json)
