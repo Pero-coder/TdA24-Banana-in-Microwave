@@ -6,6 +6,7 @@ from flask import Flask, render_template, request
 from pymongo.mongo_client import MongoClient
 from pydantic import ValidationError
 import uuid
+from typing import List, Dict, Any
 
 from validation_templates import Lecturer
 
@@ -47,13 +48,17 @@ def api_lecturers():
             # Validation not successfull
             pass
     
-    return json.loads(json_util.dumps({"lecturers": list(lecturers.find())}))
+    # Renaming key "_id" to "uuid" 
+    found_lecturers: List[Dict[str, Any]] = list(lecturers.find())
+    for i in range(len(found_lecturers)):
+        found_lecturers[i]['uuid'] = found_lecturers[i].pop('_id')
+
+    return json.loads(json_util.dumps({"lecturers": found_lecturers}))
 
 @app.route("/api/lecturers/<string:uuid>", methods=["GET"])
 def get_specific_lecturer(uuid: str):
     found_lecturer = lecturers.find_one({"_id": uuid})
-    found_lecturer["uuid"] = found_lecturer["_id"]
-    found_lecturer.pop("_id", None)
+    found_lecturer["uuid"] = found_lecturer.pop("_id")
 
     if found_lecturer is None:
         return {"code": 404, "message": "User not found"}, 404
