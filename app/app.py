@@ -4,6 +4,11 @@ from bson import json_util, ObjectId
 from dotenv import load_dotenv
 from flask import Flask, render_template, request
 from pymongo.mongo_client import MongoClient
+from pydantic import ValidationError
+import uuid
+
+from validation_templates import Lecturer
+
 
 
 load_dotenv()
@@ -30,10 +35,17 @@ def lecturer():
 @app.route("/api/lecturers", methods=["GET", "POST"])
 def api_lecturers():
     if request.method == 'POST':
-        new_lecturer = request.get_json()
-        print(new_lecturer)
-        if new_lecturer:
-            lecturers.insert_one(new_lecturer)
+        new_lecturer_json = request.get_json()
+        try:
+            # Validate by creating lecturer object
+            Lecturer(**new_lecturer_json)
+            lecturers.insert_one(new_lecturer_json)
+
+        except ValidationError as e:
+            # Validation not successfull
+            print(str(e))
+            pass
+    
     return json.loads(json_util.dumps({"lecturers": list(lecturers.find())}))
 
 @app.route("/api/lecturers/<string:uuid>", methods=["GET"])
