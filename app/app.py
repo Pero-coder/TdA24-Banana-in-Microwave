@@ -48,7 +48,7 @@ def api_lecturers():
             # Validation not successfull
             pass
     
-    # Renaming key "_id" to "uuid" 
+    # Renaming keys "_id" to "uuid" 
     found_lecturers: List[Dict[str, Any]] = list(lecturers.find())
     for i in range(len(found_lecturers)):
         found_lecturers[i]['uuid'] = found_lecturers[i].pop('_id')
