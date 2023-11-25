@@ -37,7 +37,7 @@ def api_lecturers():
     if request.method == 'POST':
         new_lecturer_json = request.get_json()
         try:
-            new_lecturer_json["uuid"] = str(uuid.uuid4())
+            new_lecturer_json["_id"] = str(uuid.uuid4())
 
             # Validate by creating lecturer object
             Lecturer(**new_lecturer_json)
@@ -52,26 +52,19 @@ def api_lecturers():
 
 @app.route("/api/lecturers/<string:uuid>", methods=["GET"])
 def get_specific_lecturer(uuid: str):
-
-    if len(uuid) == 24:
-        found_lecturer = lecturers.find_one({"_id": ObjectId(uuid)})
-    else:
-        found_lecturer = None
+    found_lecturer = lecturers.find_one({"_id": uuid})
+    found_lecturer["uuid"] = found_lecturer["_id"]
+    found_lecturer.pop("_id", None)
 
     if found_lecturer is None:
         return {"code": 404, "message": "User not found"}, 404
-    
     else:
         return json.loads(json_util.dumps(found_lecturer)), 200
 
 
 @app.route("/api/lecturers/<string:uuid>", methods=["DELETE"])
 def delete_lecturer(uuid):
-
-    if len(uuid) == 24:
-        deleted = bool(lecturers.delete_one({"_id": ObjectId(uuid)}).deleted_count)
-    else:
-        deleted = False
+    deleted = bool(lecturers.delete_one({"_id": uuid}).deleted_count)
 
     if deleted:
         return '', 204
@@ -80,15 +73,11 @@ def delete_lecturer(uuid):
 
 @app.route("/api/lecturers/<string:uuid>", methods=["PUT"])
 def update_lecturer(uuid):
-
-    if len(uuid) != 24:
-        return {"code": 404, "message": "User not found"}, 404 
-    
     updated_json = request.get_json()
-    lecturer_exists = bool(lecturers.find_one({"_id": ObjectId(uuid)}))
+    lecturer_exists = bool(lecturers.find_one({"_id": uuid}))
 
     if lecturer_exists:
-        lecturers.update_one({"_id": ObjectId(uuid)}, {"$set": updated_json})
+        lecturers.update_one({"_id": uuid}, {"$set": updated_json})
         return get_specific_lecturer(uuid)
 
     return {"code": 404, "message": "User not found"}, 404
