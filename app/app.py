@@ -8,7 +8,7 @@ from pydantic import ValidationError
 import uuid
 from typing import List, Dict, Any
 
-from validation_templates import Lecturer
+from validation_templates import NewLecturer, EditLecturer
 
 
 
@@ -39,7 +39,7 @@ def api_lecturers():
         new_lecturer_json = request.get_json()
         try:
             # Validate by creating lecturer object
-            new_lecturer_json = Lecturer(**new_lecturer_json).model_dump()
+            new_lecturer_json = NewLecturer(**new_lecturer_json).model_dump()
 
             new_lecturer_json["_id"] = str(uuid.uuid4())
             lecturers.insert_one(new_lecturer_json)
@@ -77,14 +77,21 @@ def delete_lecturer(uuid):
 
 @app.route("/api/lecturers/<string:uuid>", methods=["PUT"])
 def update_lecturer(uuid):
-    updated_json = request.get_json()
     lecturer_exists = bool(lecturers.find_one({"_id": uuid}))
 
     if lecturer_exists:
-        lecturers.update_one({"_id": uuid}, {"$set": updated_json})
-        return get_specific_lecturer(uuid)
+        updated_json = request.get_json()
 
-    return {"code": 404, "message": "User not found"}, 404
+        try:
+            updated_lecturer_json = EditLecturer(**updated_json).model_dump(exclude_none=True)
+            lecturers.update_one({"_id": uuid}, {"$set": updated_lecturer_json})
+            return get_specific_lecturer(uuid)
+        
+        except ValidationError as e:
+            return {"code": 400, "message": "Invalid data"}, 400
+        
+    else:
+        return {"code": 404, "message": "User not found"}, 404
 
 if __name__ == '__main__':
     app.jinja_env.auto_reload = True
