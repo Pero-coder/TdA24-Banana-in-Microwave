@@ -39,7 +39,7 @@ def api_lecturers():
         new_lecturer_json = request.get_json()
         try:
             # Validate by creating lecturer object
-            Lecturer(**new_lecturer_json)
+            new_lecturer_json = Lecturer(**new_lecturer_json).model_dump()
 
             new_lecturer_json["_id"] = str(uuid.uuid4())
             lecturers.insert_one(new_lecturer_json)
