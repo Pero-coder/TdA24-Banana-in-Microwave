@@ -53,7 +53,7 @@ def api_lecturers():
     for i in range(len(found_lecturers)):
         found_lecturers[i]['uuid'] = found_lecturers[i].pop('_id')
 
-    return json.loads(json_util.dumps({"lecturers": found_lecturers}))
+    return json.loads(json_util.dumps(found_lecturers))
 
 @app.route("/api/lecturers/<string:uuid>", methods=["GET"])
 def get_specific_lecturer(uuid: str):
@@ -64,7 +64,6 @@ def get_specific_lecturer(uuid: str):
         return {"code": 404, "message": "User not found"}, 404
     else:
         return json.loads(json_util.dumps(found_lecturer)), 200
-
 
 @app.route("/api/lecturers/<string:uuid>", methods=["DELETE"])
 def delete_lecturer(uuid):
