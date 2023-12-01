@@ -5,9 +5,11 @@ class Tag(BaseModel):
     uuid: Optional[str] = None
     name: str
 
+
 class Contact(BaseModel):
     telephone_numbers: List[str] = Field(..., min_items=1)
     emails: List[str] = Field(..., min_items=1)
+
 
 class NewLecturer(BaseModel):
     title_before: Optional[str] = None
