@@ -1,37 +1,21 @@
-import os
-import json
-from bson import json_util, ObjectId
-from dotenv import load_dotenv
-from flask import Flask, render_template, request
-from pymongo.mongo_client import MongoClient
+from app import app, db
+from flask import request
+
+from app.models import NewLecturer, EditLecturer
 from pydantic import ValidationError
-import uuid
 from typing import List, Dict, Any
+import uuid
+import json
+from bson import json_util
 
-from validation_templates import NewLecturer, EditLecturer
-
-
-
-load_dotenv()
-client = MongoClient(
-    f'mongodb+srv://{os.environ.get("MONGO_USERNAME")}:{os.environ.get("MONGO_PWD")}@cluster0.ebiunpa.mongodb.net/?retryWrites=true&w=majority'
-)
-app = Flask(__name__)
-db = client.test_database
 lecturers = db.lecturers
 tags = db.tags
 
-@app.route("/")
-def hello_world():
-    return "<p>Hello TdA</p>"
 
 @app.route("/api")
 def api():
     return {"secret":"The cake is a lie"}
 
-@app.route("/lecturer")
-def lecturer():
-    return render_template("lecturer.html")
 
 @app.route("/api/lecturers", methods=["GET", "POST"])
 def api_lecturers():
@@ -91,8 +75,3 @@ def update_lecturer(uuid):
         
     else:
         return {"code": 404, "message": "User not found"}, 404
-
-if __name__ == '__main__':
-    app.jinja_env.auto_reload = True
-    app.config['TEMPLATES_AUTO_RELOAD'] = True
-    app.run(debug=True, host='0.0.0.0')
