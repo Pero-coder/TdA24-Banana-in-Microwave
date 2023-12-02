@@ -1,3 +1,4 @@
+from turtle import up
 from app import app, db
 from flask import request
 
@@ -7,6 +8,7 @@ from typing import List, Dict, Any
 import uuid
 import json
 from bson import json_util
+import html
 
 lecturers = db.lecturers
 tags = db.tags
@@ -24,6 +26,9 @@ def api_lecturers():
         try:
             # Validate by creating lecturer object
             new_lecturer_json = NewLecturer(**new_lecturer_json).model_dump()
+
+            # Escape HTML
+            new_lecturer_json = {k: html.escape(v) if isinstance(v, str) else v for k, v in new_lecturer_json.items()}
 
             new_lecturer_json["_id"] = str(uuid.uuid4())
             lecturers.insert_one(new_lecturer_json)
@@ -70,6 +75,10 @@ def update_lecturer(uuid):
 
         try:
             updated_lecturer_json = EditLecturer(**updated_json).model_dump(exclude_none=True)
+
+            # Escape HTML
+            updated_lecturer_json = {k: html.escape(v) if isinstance(v, str) else v for k, v in updated_lecturer_json.items()}
+            
             lecturers.update_one({"_id": uuid}, {"$set": updated_lecturer_json})
             return get_specific_lecturer(uuid)
         
