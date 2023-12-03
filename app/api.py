@@ -33,6 +33,8 @@ def api_lecturers():
             new_lecturer_json["_id"] = str(uuid.uuid4())
             lecturers.insert_one(new_lecturer_json)
 
+            return get_specific_lecturer(new_lecturer_json["_id"])
+
         except ValidationError as e:
             # Validation not successfull
             pass
