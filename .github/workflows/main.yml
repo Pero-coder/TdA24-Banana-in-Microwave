@@ -24,8 +24,8 @@ jobs:
           tags: tda-flask:latest
           outputs: type=docker,dest=/tmp/tda-flask.tar
           build-args: |
-            MONGO_USERNAME: ${{ secrets.MONGO_USERNAME }}
-            MONGO_PWD: ${{ secrets.MONGO_PWD }}
+            MONGO_USERNAME=${{ secrets.MONGO_USERNAME }}
+            MONGO_PWD=${{ secrets.MONGO_PWD }}
 
       - name: Upload to TdA
         uses: Tour-de-App/upload-app@tda-24
