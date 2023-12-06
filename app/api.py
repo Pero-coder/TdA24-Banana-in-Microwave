@@ -34,14 +34,15 @@ def api_lecturers():
                 existing_tags[tag["name"]] = tag["uuid"]
 
             # Check tags in request
+            # Find/create and ADD uuid
             for i in range(len(new_lecturer_object.tags)):
 
                 if new_lecturer_object.tags[i].name in existing_tags.keys():
-                    # Existing tag uuid
+                    # Existing tag was found
                     new_lecturer_object.tags[i].uuid = str(existing_tags[new_lecturer_object.tags[i].name])
 
                 else:
-                    # New uuid tag
+                    # New tag will be created
                     new_lecturer_object.tags[i].uuid = str(uuid.uuid4())
 
                     new_tag_json = Tag(uuid=new_lecturer_object.tags[i].uuid, name=new_lecturer_object.tags[i].name).model_dump()
@@ -60,7 +61,6 @@ def api_lecturers():
 
         except ValidationError as e:
             # Validation not successfull
-            print(e)
             pass
     
     # Renaming keys "_id" to "uuid" 
@@ -92,21 +92,45 @@ def delete_lecturer(uuid):
         return {"code": 404, "message": "User not found"}, 404
 
 
-@app.route("/api/lecturers/<string:uuid>", methods=["PUT"])
-def update_lecturer(uuid):
-    lecturer_exists = bool(lecturers.find_one({"_id": uuid}))
+@app.route("/api/lecturers/<string:lecturer_uuid>", methods=["PUT"])
+def update_lecturer(lecturer_uuid):
+    lecturer_exists = bool(lecturers.find_one({"_id": lecturer_uuid}))
 
     if lecturer_exists:
         updated_json = request.get_json()
 
         try:
-            updated_lecturer_json = EditLecturer(**updated_json).model_dump(exclude_none=True)
+            updated_lecturer_object = EditLecturer(**updated_json)
+
+            existing_tags: Dict[str, str] = dict()
+            for tag in list(tags.find()):
+                tag["uuid"] = str(tag.pop("_id"))
+                existing_tags[tag["name"]] = tag["uuid"]
+
+            # Check tags in request
+            # Find/create and ADD uuid
+            for i in range(len(updated_lecturer_object.tags)):
+                if updated_lecturer_object.tags[i].name in existing_tags.keys():
+                    # Existing tag was found
+                    updated_lecturer_object.tags[i].uuid = str(existing_tags[updated_lecturer_object.tags[i].name])
+
+                else:
+                    # New tag will be created
+                    updated_lecturer_object.tags[i].uuid = str(uuid.uuid4())
+
+                    new_tag_json = Tag(uuid=updated_lecturer_object.tags[i].uuid, name=updated_lecturer_object.tags[i].name).model_dump()
+                    
+                    # Renamed uuid to _id
+                    new_tag_json["_id"] = new_tag_json.pop("uuid")
+                    tags.insert_one(new_tag_json)
+
+            updated_lecturer_json = updated_lecturer_object.model_dump(exclude_none=True)
 
             # Escape HTML
             updated_lecturer_json = {k: html.escape(v) if isinstance(v, str) else v for k, v in updated_lecturer_json.items()}
             
-            lecturers.update_one({"_id": uuid}, {"$set": updated_lecturer_json})
-            return get_specific_lecturer(uuid)
+            lecturers.update_one({"_id": lecturer_uuid}, {"$set": updated_lecturer_json})
+            return get_specific_lecturer(lecturer_uuid)
         
         except ValidationError as e:
             return {"code": 400, "message": "Invalid data"}, 400
