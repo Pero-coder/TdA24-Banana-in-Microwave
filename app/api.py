@@ -22,10 +22,15 @@ def api():
 @app.route("/api/lecturers", methods=["GET", "POST"])
 def api_lecturers():
     if request.method == 'POST':
-        new_lecturer_json = request.get_json()
+        request_json = request.get_json()
         try:
             # Validate by creating lecturer object
-            new_lecturer_json = NewLecturer(**new_lecturer_json).model_dump()
+            new_lecturer_object = NewLecturer(**request_json)
+            
+            for i in range(len(new_lecturer_object.tags)):
+                new_lecturer_object.tags[i].uuid = str(uuid.uuid4())
+
+            new_lecturer_json = new_lecturer_object.model_dump()
 
             # Escape HTML
             new_lecturer_json = {k: html.escape(v) if isinstance(v, str) else v for k, v in new_lecturer_json.items()}

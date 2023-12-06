@@ -1,7 +1,11 @@
 from pydantic import BaseModel, Field
 from typing import Optional, List
 
-class Tag(BaseModel):
+class NewTag(BaseModel):
+    uuid: Optional[str] = None
+    name: str
+
+class EditTag(BaseModel):
     uuid: str
     name: str
 
@@ -21,7 +25,7 @@ class NewLecturer(BaseModel):
     location: Optional[str] = None
     claim: Optional[str] = None
     bio: Optional[str] = None
-    tags: List[Tag] = Field(..., min_items=0, uniqueItems=True)
+    tags: List[NewTag] = Field(..., min_items=0, uniqueItems=True)
     price_per_hour: Optional[int] = Field(None, ge=0)
     contact: Contact
 
@@ -39,7 +43,7 @@ class EditLecturer(BaseModel):
     location: Optional[str] = None
     claim: Optional[str] = None
     bio: Optional[str] = None
-    tags: Optional[List[Tag]] = Field(None, min_items=0, uniqueItems=True)
+    tags: Optional[List[EditTag]] = Field(None, min_items=0, uniqueItems=True)
     price_per_hour: Optional[int] = Field(None, ge=0)
     contact: Optional[Contact] = None
 
