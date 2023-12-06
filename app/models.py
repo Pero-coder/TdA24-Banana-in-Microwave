@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field
 from typing import Optional, List
 
 class Tag(BaseModel):
-    uuid: str
+    uuid: Optional[str] = None
     name: str
 
 
