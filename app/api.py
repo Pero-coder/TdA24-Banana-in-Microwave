@@ -2,7 +2,7 @@ from turtle import up
 from app import app, db
 from flask import request
 
-from app.models import NewLecturer, EditLecturer
+from app.models import NewLecturer, EditLecturer, Tag
 from pydantic import ValidationError
 from typing import List, Dict, Any
 import uuid
@@ -26,9 +26,29 @@ def api_lecturers():
         try:
             # Validate by creating lecturer object
             new_lecturer_object = NewLecturer(**request_json)
-            
+
+            # Load existing tags as {name: uuid} json
+            existing_tags: Dict[str, str] = dict()
+            for tag in list(tags.find()):
+                tag["uuid"] = str(tag.pop("_id"))
+                existing_tags[tag["name"]] = tag["uuid"]
+
+            # Check tags in request
             for i in range(len(new_lecturer_object.tags)):
-                new_lecturer_object.tags[i].uuid = str(uuid.uuid4())
+
+                if new_lecturer_object.tags[i].name in existing_tags.keys():
+                    # Existing tag uuid
+                    new_lecturer_object.tags[i].uuid = str(existing_tags[new_lecturer_object.tags[i].name])
+
+                else:
+                    # New uuid tag
+                    new_lecturer_object.tags[i].uuid = str(uuid.uuid4())
+
+                    new_tag_json = Tag(uuid=new_lecturer_object.tags[i].uuid, name=new_lecturer_object.tags[i].name).model_dump()
+                    
+                    # Renamed uuid to _id
+                    new_tag_json["_id"] = new_tag_json.pop("uuid")
+                    tags.insert_one(new_tag_json)
 
             new_lecturer_json = new_lecturer_object.model_dump()
 
@@ -40,6 +60,7 @@ def api_lecturers():
 
         except ValidationError as e:
             # Validation not successfull
+            print(e)
             pass
     
     # Renaming keys "_id" to "uuid" 
