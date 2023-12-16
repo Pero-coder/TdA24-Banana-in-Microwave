@@ -61,7 +61,7 @@ def api_lecturers():
 
         except ValidationError as e:
             # Validation not successfull
-            pass
+            return {"code": 400, "message": "Invalid data"}, 400
     
     # Renaming keys "_id" to "uuid" 
     found_lecturers: List[Dict[str, Any]] = list(lecturers.find())
