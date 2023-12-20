@@ -1,10 +1,14 @@
 from flask import render_template
-from app import app
+from app import app, api
 
 
-@app.route("/lecturer")
-def lecturer():
-    return render_template("lecturer.html")
+@app.route("/lecturer/<string:uuid>")
+def lecturer(uuid: str):
+    lecturer = api.get_specific_lecturer(uuid)
+    if lecturer[1] == 404:
+        return lecturer
+
+    return render_template("lecturer.html", **lecturer[0])
 
 
 @app.route("/")
