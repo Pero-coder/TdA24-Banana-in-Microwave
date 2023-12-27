@@ -199,6 +199,10 @@ def filter_lecturers():
     else:
         total_count = DEFAULT_RESULTS_COUNT
 
-    found_lecturers = lecturers.find(search_query).skip(start_index).limit(total_count)
+    found_lecturers: List[Dict[str, Any]] = list(lecturers.find(search_query).skip(start_index).limit(total_count))
+
+    # Renaming keys "_id" to "uuid" 
+    for i in range(len(found_lecturers)):
+        found_lecturers[i]['uuid'] = found_lecturers[i].pop('_id')
 
     return json.loads(json_util.dumps(found_lecturers))
