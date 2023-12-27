@@ -10,6 +10,9 @@ import json
 from bson import json_util
 import html
 
+DEFAULT_RESULTS_COUNT = 20
+
+
 lecturers = db.lecturers
 tags = db.tags
 
@@ -138,3 +141,64 @@ def update_lecturer(lecturer_uuid):
         
     else:
         return {"code": 404, "message": "User not found"}, 404
+
+
+@app.route("/api/filter", methods=["POST"])
+def filter_lecturers():
+    # cost_min
+    # cost_max
+    # tags[] -> "tag1,tag2,tag3".split(',')
+    # location
+
+    # start_index
+    # total_count
+
+    search_query = dict()
+
+    location = request.args.get('location')
+    if location is not None:
+        search_query["location"] = location
+
+    price_conditions = []
+    cost_min = request.args.get('cost_min')
+    if cost_min is not None:
+        if cost_min.isdecimal():
+            price_conditions.append({"price_per_hour": {"$gte": int(cost_min)}})
+
+    cost_max = request.args.get('cost_max')
+    if cost_max is not None:
+        if cost_max.isdecimal():
+            price_conditions.append({"price_per_hour": {"$lte": int(cost_max)}})
+
+    if price_conditions:
+        search_query["$and"] = price_conditions
+
+
+    tags = request.args.get('tags')
+    if tags is not None:
+        tags = tags.split(',')
+        if len(tags) > 0:
+            search_query["tags.name"] = {"$all": tags}
+
+
+    start_index = request.args.get('start_index')
+    if start_index is not None:
+        if start_index.isdecimal():
+            start_index = int(start_index)
+        else:
+            start_index = 0
+    else:
+        start_index = 0
+    
+    total_count = request.args.get('total_count')
+    if total_count is not None:
+        if total_count.isdecimal():
+            total_count = int(total_count)
+        else:
+            total_count = DEFAULT_RESULTS_COUNT
+    else:
+        total_count = DEFAULT_RESULTS_COUNT
+
+    found_lecturers = lecturers.find(search_query).skip(start_index).limit(total_count)
+
+    return json.loads(json_util.dumps(found_lecturers))
