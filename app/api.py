@@ -205,4 +205,4 @@ def filter_lecturers():
     for i in range(len(found_lecturers)):
         found_lecturers[i]['uuid'] = found_lecturers[i].pop('_id')
 
-    return json.loads(json_util.dumps(found_lecturers))
+    return json.loads(json_util.dumps(found_lecturers)), 200
