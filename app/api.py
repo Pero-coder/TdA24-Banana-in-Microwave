@@ -71,7 +71,7 @@ def api_lecturers():
     for i in range(len(found_lecturers)):
         found_lecturers[i]['uuid'] = found_lecturers[i].pop('_id')
 
-    return json.loads(json_util.dumps(found_lecturers))
+    return json.loads(json_util.dumps(found_lecturers)), 200
 
 
 @app.route("/api/lecturers/<string:uuid>", methods=["GET"])
