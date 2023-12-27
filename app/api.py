@@ -102,27 +102,28 @@ def update_lecturer(lecturer_uuid):
         try:
             updated_lecturer_object = EditLecturer(**updated_json)
 
-            existing_tags: Dict[str, str] = dict()
-            for tag in list(tags.find()):
-                tag["uuid"] = str(tag.pop("_id"))
-                existing_tags[tag["name"]] = tag["uuid"]
+            if updated_lecturer_object.tags is not None:
+                existing_tags: Dict[str, str] = dict()
+                for tag in list(tags.find()):
+                    tag["uuid"] = str(tag.pop("_id"))
+                    existing_tags[tag["name"]] = tag["uuid"]
 
-            # Check tags in request
-            # Find/create and ADD uuid
-            for i in range(len(updated_lecturer_object.tags)):
-                if updated_lecturer_object.tags[i].name in existing_tags.keys():
-                    # Existing tag was found
-                    updated_lecturer_object.tags[i].uuid = str(existing_tags[updated_lecturer_object.tags[i].name])
+                # Check tags in request
+                # Find/create and ADD uuid
+                for i in range(len(updated_lecturer_object.tags)):
+                    if updated_lecturer_object.tags[i].name in existing_tags.keys():
+                        # Existing tag was found
+                        updated_lecturer_object.tags[i].uuid = str(existing_tags[updated_lecturer_object.tags[i].name])
 
-                else:
-                    # New tag will be created
-                    updated_lecturer_object.tags[i].uuid = str(uuid.uuid4())
+                    else:
+                        # New tag will be created
+                        updated_lecturer_object.tags[i].uuid = str(uuid.uuid4())
 
-                    new_tag_json = Tag(uuid=updated_lecturer_object.tags[i].uuid, name=updated_lecturer_object.tags[i].name).model_dump()
-                    
-                    # Renamed uuid to _id
-                    new_tag_json["_id"] = new_tag_json.pop("uuid")
-                    tags.insert_one(new_tag_json)
+                        new_tag_json = Tag(uuid=updated_lecturer_object.tags[i].uuid, name=updated_lecturer_object.tags[i].name).model_dump()
+                        
+                        # Renamed uuid to _id
+                        new_tag_json["_id"] = new_tag_json.pop("uuid")
+                        tags.insert_one(new_tag_json)
 
             updated_lecturer_json = updated_lecturer_object.model_dump(exclude_none=True)
 
