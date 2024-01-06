@@ -1,0 +1,27 @@
+{% for lecturer in lecturers %}
+<div class="lecturer-card" 
+    {% if loop.last %} 
+    hx-get="/api/filter?start_index={{start_index + total_count}}"
+    hx-trigger="revealed"
+    hx-swap="afterend"
+    {% endif %}>
+    <h1>
+        <p class="picture"><img src="{{ lecturer.picture_url }}"></p>
+        {% if lecturer.title_before %}{{ lecturer.title_before }} {% endif %}
+        {{lecturer.first_name}} 
+        {% if lecturer.middle_name %}{{ lecturer.middle_name }} {% endif %}
+        {{ lecturer.last_name }} 
+        {% if lecturer.title_after %}{{ lecturer.title_after }}{% endif %}
+    </h1>
+    <p class="claim">{{ lecturer.claim }}</p>
+    <p class="price-label">Cena za hodinu mojí lekce:</p>
+    <p class="price">{{ lecturer.price_per_hour }}</p>
+    <p class="city">{{location}}</p>
+    <p class="tags">
+        Tagy: 
+        {% for tag in lecturer.tags %}
+            #{{ tag.name }}
+        {% endfor %}
+    </p>
+</div>
+{% endfor %}

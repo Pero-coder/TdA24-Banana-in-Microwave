@@ -13,4 +13,4 @@ def lecturer(uuid: str):
 
 @app.route("/")
 def hello_world():
-    return "<p>Hello TdA</p>"
+    return render_template("home.html")

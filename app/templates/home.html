@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <title>Teacher digital Agency</title>
+</head>
+<body>
+    <div class="lecturers">
+        <div class="lecturer-card" 
+            hx-get="/api/filter"
+            hx-trigger="revealed"
+            hx-swap="afterend">
+            <h1>Lecturers</h1>
+        </div>
+    </div>
+</body>
+</html>

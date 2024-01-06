@@ -1,6 +1,6 @@
 from turtle import up
 from app import app, db
-from flask import request
+from flask import render_template, request
 
 from app.models import NewLecturer, EditLecturer, Tag
 from pydantic import ValidationError
@@ -143,7 +143,7 @@ def update_lecturer(lecturer_uuid):
         return {"code": 404, "message": "User not found"}, 404
 
 
-@app.route("/api/filter", methods=["POST"])
+@app.route("/api/filter", methods=["GET"])
 def filter_lecturers():
     # cost_min
     # cost_max
@@ -205,4 +205,5 @@ def filter_lecturers():
     for i in range(len(found_lecturers)):
         found_lecturers[i]['uuid'] = found_lecturers[i].pop('_id')
 
-    return json.loads(json_util.dumps(found_lecturers)), 200
+    # return json.loads(json_util.dumps(found_lecturers)), 200
+    return render_template("lecturer_list.html", lecturers=found_lecturers, start_index=start_index, total_count=total_count, search_query=search_query)
