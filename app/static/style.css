@@ -2,8 +2,8 @@
 @import 'https://fonts.googleapis.com/css?family=Open+Sans';
 
 body {
-    background-color: #FFFFFF;
-    color: #333333;
+    background-color: #fafafa;
+    color: #00384D;
     margin: auto;
 }
 
@@ -24,6 +24,10 @@ p {
 .grid-container {
     display: grid;
     grid-template-rows: auto 1fr;
+}
+
+.navbar {
+    background-color: #ffffff;
 }
 
 /* Content */
@@ -54,7 +58,8 @@ p {
 
 /* Contacts */
 .contacts {
-    background-color: #74C7D3;
+    background-color: #00384D;
+    color: #ffffff;
     border-top-right-radius: 50px;
     display: grid;
     grid-template-columns: 1fr 1fr;

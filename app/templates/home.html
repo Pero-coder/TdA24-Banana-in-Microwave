@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <link rel="stylesheet" href="{{url_for('static', filename='home.css')}}">
+    <link rel="icon" href="{{url_for('static', filename='favicon.svg')}}" type="image/svg+xml">
     <title>Teacher digital Agency</title>
 </head>
 <body>
@@ -12,7 +14,6 @@
             hx-get="/api/filter"
             hx-trigger="revealed"
             hx-swap="afterend">
-            <h1>Lecturers</h1>
         </div>
     </div>
 </body>
