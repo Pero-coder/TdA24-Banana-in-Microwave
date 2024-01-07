@@ -207,3 +207,14 @@ def filter_lecturers():
 
     # return json.loads(json_util.dumps(found_lecturers)), 200
     return render_template("lecturer_list.html", lecturers=found_lecturers, start_index=start_index, total_count=total_count, search_query=search_query)
+
+
+@app.route("/api/tags", methods=["GET"])
+def get_all_tags():
+    existing_tags: List[Dict] = list()
+    for tag in list(tags.find()):
+        # Renaming keys "_id" to "uuid" 
+        tag["uuid"] = str(tag.pop("_id"))
+        existing_tags.append(tag)
+
+    return existing_tags, 200
