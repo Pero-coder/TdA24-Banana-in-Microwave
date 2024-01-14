@@ -218,3 +218,5 @@ def get_all_tags():
         existing_tags.append(tag)
 
     return existing_tags, 200
+
+# TODO: Location filter

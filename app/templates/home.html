@@ -4,11 +4,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="{{url_for('static', filename='script.js')}}"></script>
     <link rel="stylesheet" href="{{url_for('static', filename='home.css')}}">
     <link rel="icon" href="{{url_for('static', filename='favicon.svg')}}" type="image/svg+xml">
     <title>Teacher digital Agency</title>
 </head>
 <body>
+    <dialog id="filterModal">
+        <form>
+            <h2>Cena:</h2>
+            <p>
+                <label for="cost_min">Minimální cena:</label>
+                <input type="number" name="cost_min" id="cost_min">
+            </p>
+
+            <p>
+                <label for="cost_max">Maximální cena:</label>
+                <input type="number" name="cost_max" id="cost_max">
+            </p>
+
+            <h2>Tagy:</h2>
+            {% for tag in tags %}
+            <p>
+                <input type="checkbox" name="tag" id="tag_{{tag.uuid}}" value="{{tag.uuid}}">
+                <label for="tag_{{tag.uuid}}">#{{tag.name}}</label>
+            </p>
+            {% endfor %}
+
+            <!--TODO: Location filter-->
+
+            <div>
+                <button type="submit" id="applyFilter">Filtrovat</button>
+                <button formmethod="dialog" type="submit">Zavřít</button>
+            </div>
+        </form>
+    </dialog>
+    <button id="filterBtn">Filter</button>
     <div class="lecturers">
         <div class="lecturer-card" 
             hx-get="/api/filter"
