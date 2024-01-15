@@ -155,7 +155,7 @@ def filter_lecturers():
     search_query = dict()
 
     location = request.args.get('location')
-    if location is not None:
+    if location != "":
         search_query["location"] = location
 
     price_conditions = []
@@ -226,4 +226,10 @@ def get_all_tags():
 
     return existing_tags, 200
 
-# TODO: Location filter
+def get_all_locations():
+    existing_locations: List[str] = list()
+    for lecturer in list(lecturers.find()):
+        if lecturer["location"] not in existing_locations and lecturer["location"] is not None:
+            existing_locations.append(lecturer["location"])
+
+    return existing_locations, 200

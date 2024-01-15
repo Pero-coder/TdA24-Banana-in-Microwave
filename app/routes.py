@@ -13,4 +13,4 @@ def lecturer(uuid: str):
 
 @app.route("/")
 def hello_world():
-    return render_template("home.html", tags=api.get_all_tags()[0])
+    return render_template("home.html", tags=api.get_all_tags()[0], locations=api.get_all_locations()[0])

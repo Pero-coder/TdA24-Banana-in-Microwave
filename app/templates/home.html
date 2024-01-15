@@ -32,7 +32,15 @@
             </p>
             {% endfor %}
 
-            <!--TODO: Location filter-->
+            <h2>Město:</h2>
+            <p>
+                <select name="location" id="location">
+                    <option value="">Všechna města</option>
+                    {% for location in locations %}
+                    <option value="{{location}}">{{location}}</option>
+                    {% endfor %}
+                </select>
+            </p>
 
             <div>
                 <button type="submit" id="applyFilter">Filtrovat</button>
