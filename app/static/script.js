@@ -9,6 +9,18 @@ document.addEventListener('DOMContentLoaded', (e) => {
 
     applyFilter.addEventListener('click', (e) => {
         e.preventDefault();
+        console.log($('#filterModalForm').serialize())
+        $('#lecturers').html(
+            `<div class="lecturer-card" 
+                hx-get="/api/filter?${$('#filterModalForm').serialize()}"
+                hx-trigger="revealed"
+                hx-swap="afterend">
+            </div>`
+        );
+        
         filterModal.close();
+
+        // Re-trigger htmx processing
+        htmx.process(document.body);
     });
 });

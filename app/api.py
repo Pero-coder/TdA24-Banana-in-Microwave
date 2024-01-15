@@ -1,4 +1,3 @@
-from turtle import up
 from app import app, db
 from flask import render_template, request
 
@@ -174,11 +173,9 @@ def filter_lecturers():
         search_query["$and"] = price_conditions
 
 
-    tags = request.args.get('tags')
-    if tags is not None:
-        tags = tags.split(',')
-        if len(tags) > 0:
-            search_query["tags.name"] = {"$all": tags}
+    tags = request.args.getlist('tag')
+    if tags:
+        search_query["tags.uuid"] = {"$all": tags}
 
 
     start_index = request.args.get('start_index')
@@ -206,7 +203,12 @@ def filter_lecturers():
         found_lecturers[i]['uuid'] = found_lecturers[i].pop('_id')
 
     # return json.loads(json_util.dumps(found_lecturers)), 200
-    return render_template("lecturer_list.html", lecturers=found_lecturers, start_index=start_index, total_count=total_count, search_query=search_query)
+    return render_template(
+        "lecturer_list.html", 
+        lecturers=found_lecturers, 
+        start_index=start_index, 
+        total_count=total_count, 
+        query_string=request.query_string.decode("utf-8"))
 
 
 @app.route("/api/tags", methods=["GET"])
