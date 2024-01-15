@@ -172,9 +172,14 @@ def filter_lecturers():
     if price_conditions:
         search_query["$and"] = price_conditions
 
-
     tags = request.args.getlist('tag')
     if tags:
+        # Ensure all tags are valid UUIDs
+        for tag in tags:
+            try:
+                uuid.UUID(tag, version=4)
+            except ValueError:
+                return "Invalid tag id", 400
         search_query["tags.uuid"] = {"$all": tags}
 
 
