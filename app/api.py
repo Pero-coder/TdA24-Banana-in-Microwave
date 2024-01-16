@@ -155,7 +155,7 @@ def filter_lecturers():
     search_query = dict()
 
     location = request.args.get('location')
-    if location != "":
+    if location:
         search_query["location"] = location
 
     price_conditions = []

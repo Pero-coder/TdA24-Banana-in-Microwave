@@ -14,10 +14,10 @@
             {{ lecturer.last_name }} 
             {% if lecturer.title_after %}{{ lecturer.title_after }}{% endif %}
         </h1>
-        <p class="claim">{{ lecturer.claim }}</p>
-        <p class="price-label">Cena za hodinu mojí lekce:</p>
-        <p class="price">{{ lecturer.price_per_hour }}</p>
-        <p class="city">{{location}}</p>
+        <p class="claim">{% if lecturer.claim %}{{ lecturer.claim }}{% endif %}</p>
+        <p class="price-label">{% if lecturer.price_per_hour %}Cena za hodinu mojí lekce:{% endif %}</p>
+        <p class="price">{% if lecturer.price_per_hour %}{{ lecturer.price_per_hour }}{% endif %}</p>
+        <p class="city">{% if lecturer.location %}{{ lecturer.location }}{% endif %}</p>
         <p class="tags">
             Tagy: 
             {% for tag in lecturer.tags %}

@@ -16,7 +16,7 @@
             <div class="contacts">
                 <p class="picture"><img src="{{picture_url}}"></p>
                 <div class="info">
-                    <p class="city">{{location}}</p>
+                    <p class="city">{% if location %}{{location}}{% endif %}</p>
                     {% for phone in contact.telephone_numbers %}
                         <p class="phone">{{phone}}</p>
                     {% endfor %}
@@ -33,10 +33,10 @@
                     {{last_name}} 
                     {% if title_after %}{{title_after}}{% endif %}
                 </h1>
-                <p class="claim">{{claim}}</p>
-                <p class="bio">{{bio}}</p>
-                <p class="price-label">Cena za hodinu mojí lekce:</p>
-                <p class="price">{{price_per_hour}}</p>
+                <p class="claim">{% if claim %}{{claim}}{% endif %}</p>
+                <p class="bio">{% if bio %}{{bio}}{% endif %}</p>
+                <p class="price-label">{% if price_per_hour %}Cena za hodinu mojí lekce:{% endif %}</p>
+                <p class="price">{% if price_per_hour %}{{price_per_hour}}{% endif %}</p>
                 <p class="tags">
                     Tagy: 
                     {% for tag in tags %}

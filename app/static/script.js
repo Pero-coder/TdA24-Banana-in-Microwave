@@ -9,7 +9,6 @@ document.addEventListener('DOMContentLoaded', (e) => {
 
     applyFilter.addEventListener('click', (e) => {
         e.preventDefault();
-        console.log($('#filterModalForm').serialize())
         $('#lecturers').html(
             `<div class="lecturer-card" 
                 hx-get="/api/filter?${$('#filterModalForm').serialize()}"
