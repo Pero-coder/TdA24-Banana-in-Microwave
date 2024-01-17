@@ -48,12 +48,12 @@
 
                 <div>
                     <button type="submit" id="applyFilter">Filtrovat</button>
-                    <button formmethod="dialog" type="submit">Zavřít</button>
+                    <button formmethod="dialog" type="submit" id="closeModal">Zavřít</button>
                 </div>
             </form>
         </dialog>
         <div class="filters">
-            <button id="filterBtn">Filter</button>
+            <img src="{{url_for('static', filename='filter-solid.svg')}}" id="filterBtn">
         </div>
         <div class="lecturers">
             <div
