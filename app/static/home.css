@@ -72,6 +72,60 @@ p {
     border-color: #74C7D3;
 }
 
+select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #f8f8f8;
+    font-size: 16px;
+}
+
+select option {
+    padding: 10px;
+    background-color: #f8f8f8;
+    color: #000;
+}
+
+input[type="number"] {
+    width: 97%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #f8f8f8;
+    font-size: 16px;
+}
+
+/* Hide the default checkbox */
+input[type="checkbox"] {
+    display: none;
+}
+
+/* Create a custom checkbox */
+input[type="checkbox"] + label {
+    position: relative;
+    padding-left: 35px;
+    cursor: pointer;
+}
+
+input[type="checkbox"] + label:before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 25px;
+    height: 25px;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    background: #fff;
+}
+
+/* Style the custom checkbox when checked */
+input[type="checkbox"]:checked + label:before {
+    background: #00384D;
+}
+
+
 a {
     color: inherit;
     text-decoration: none;
