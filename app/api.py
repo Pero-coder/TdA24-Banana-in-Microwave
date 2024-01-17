@@ -65,7 +65,7 @@ def api_lecturers():
             # Validation not successfull
             return {"code": 400, "message": "Invalid data"}, 400
     
-    # Renaming keys "_id" to "uuid" 
+    # Renaming keys "_id" to "uuid"
     found_lecturers: List[Dict[str, Any]] = list(lecturers.find())
     for i in range(len(found_lecturers)):
         found_lecturers[i]['uuid'] = found_lecturers[i].pop('_id')
@@ -75,7 +75,7 @@ def api_lecturers():
 
 @app.route("/api/lecturers/<string:uuid>", methods=["GET"])
 def get_specific_lecturer(uuid: str):
-    found_lecturer = lecturers.find_one({"_id": uuid})
+    found_lecturer = lecturers.find_one({"_id": {"$eq": uuid}})
 
     if found_lecturer is None:
         return {"code": 404, "message": "User not found"}, 404
@@ -86,7 +86,7 @@ def get_specific_lecturer(uuid: str):
 
 @app.route("/api/lecturers/<string:uuid>", methods=["DELETE"])
 def delete_lecturer(uuid):
-    deleted = bool(lecturers.delete_one({"_id": uuid}).deleted_count)
+    deleted = bool(lecturers.delete_one({"_id": {"$eq": uuid}}).deleted_count)
 
     if deleted:
         return '', 204
@@ -96,7 +96,7 @@ def delete_lecturer(uuid):
 
 @app.route("/api/lecturers/<string:lecturer_uuid>", methods=["PUT"])
 def update_lecturer(lecturer_uuid):
-    lecturer_exists = bool(lecturers.find_one({"_id": lecturer_uuid}))
+    lecturer_exists = bool(lecturers.find_one({"_id": {"$eq": lecturer_uuid}}))
 
     if lecturer_exists:
         updated_json = request.get_json()
@@ -156,7 +156,7 @@ def filter_lecturers():
 
     location = request.args.get('location')
     if location:
-        search_query["location"] = location
+        search_query["location"] = {"$eq": location}
 
     price_conditions = []
     cost_min = request.args.get('cost_min')
