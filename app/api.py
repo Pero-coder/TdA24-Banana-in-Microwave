@@ -1,6 +1,5 @@
-from turtle import up
 from app import app, db
-from flask import request
+from flask import render_template, request
 
 from app.models import NewLecturer, EditLecturer, Tag
 from pydantic import ValidationError
@@ -9,6 +8,9 @@ import uuid
 import json
 from bson import json_util
 import bleach
+
+DEFAULT_RESULTS_COUNT = 20
+
 
 lecturers = db.lecturers
 tags = db.tags
@@ -67,17 +69,17 @@ def api_lecturers():
             # Validation not successfull
             return {"code": 400, "message": "Invalid data"}, 400
     
-    # Renaming keys "_id" to "uuid" 
+    # Renaming keys "_id" to "uuid"
     found_lecturers: List[Dict[str, Any]] = list(lecturers.find())
     for i in range(len(found_lecturers)):
         found_lecturers[i]['uuid'] = found_lecturers[i].pop('_id')
 
-    return json.loads(json_util.dumps(found_lecturers))
+    return json.loads(json_util.dumps(found_lecturers)), 200
 
 
 @app.route("/api/lecturers/<string:uuid>", methods=["GET"])
 def get_specific_lecturer(uuid: str):
-    found_lecturer = lecturers.find_one({"_id": uuid})
+    found_lecturer = lecturers.find_one({"_id": {"$eq": uuid}})
 
     if found_lecturer is None:
         return {"code": 404, "message": "User not found"}, 404
@@ -88,7 +90,7 @@ def get_specific_lecturer(uuid: str):
 
 @app.route("/api/lecturers/<string:uuid>", methods=["DELETE"])
 def delete_lecturer(uuid):
-    deleted = bool(lecturers.delete_one({"_id": uuid}).deleted_count)
+    deleted = bool(lecturers.delete_one({"_id": {"$eq": uuid}}).deleted_count)
 
     if deleted:
         return '', 204
@@ -98,7 +100,7 @@ def delete_lecturer(uuid):
 
 @app.route("/api/lecturers/<string:lecturer_uuid>", methods=["PUT"])
 def update_lecturer(lecturer_uuid):
-    lecturer_exists = bool(lecturers.find_one({"_id": lecturer_uuid}))
+    lecturer_exists = bool(lecturers.find_one({"_id": {"$eq": lecturer_uuid}}))
 
     if lecturer_exists:
         updated_json = request.get_json()
@@ -106,27 +108,28 @@ def update_lecturer(lecturer_uuid):
         try:
             updated_lecturer_object = EditLecturer(**updated_json)
 
-            existing_tags: Dict[str, str] = dict()
-            for tag in list(tags.find()):
-                tag["uuid"] = str(tag.pop("_id"))
-                existing_tags[tag["name"]] = tag["uuid"]
+            if updated_lecturer_object.tags is not None:
+                existing_tags: Dict[str, str] = dict()
+                for tag in list(tags.find()):
+                    tag["uuid"] = str(tag.pop("_id"))
+                    existing_tags[tag["name"]] = tag["uuid"]
 
-            # Check tags in request
-            # Find/create and ADD uuid
-            for i in range(len(updated_lecturer_object.tags)):
-                if updated_lecturer_object.tags[i].name in existing_tags.keys():
-                    # Existing tag was found
-                    updated_lecturer_object.tags[i].uuid = str(existing_tags[updated_lecturer_object.tags[i].name])
+                # Check tags in request
+                # Find/create and ADD uuid
+                for i in range(len(updated_lecturer_object.tags)):
+                    if updated_lecturer_object.tags[i].name in existing_tags.keys():
+                        # Existing tag was found
+                        updated_lecturer_object.tags[i].uuid = str(existing_tags[updated_lecturer_object.tags[i].name])
 
-                else:
-                    # New tag will be created
-                    updated_lecturer_object.tags[i].uuid = str(uuid.uuid4())
+                    else:
+                        # New tag will be created
+                        updated_lecturer_object.tags[i].uuid = str(uuid.uuid4())
 
-                    new_tag_json = Tag(uuid=updated_lecturer_object.tags[i].uuid, name=updated_lecturer_object.tags[i].name).model_dump()
-                    
-                    # Renamed uuid to _id
-                    new_tag_json["_id"] = new_tag_json.pop("uuid")
-                    tags.insert_one(new_tag_json)
+                        new_tag_json = Tag(uuid=updated_lecturer_object.tags[i].uuid, name=updated_lecturer_object.tags[i].name).model_dump()
+                        
+                        # Renamed uuid to _id
+                        new_tag_json["_id"] = new_tag_json.pop("uuid")
+                        tags.insert_one(new_tag_json)
 
             updated_lecturer_json = updated_lecturer_object.model_dump(exclude_none=True)
 
@@ -141,3 +144,77 @@ def update_lecturer(lecturer_uuid):
         
     else:
         return {"code": 404, "message": "User not found"}, 404
+
+
+@app.route("/api/filter", methods=["GET"])
+def filter_lecturers():
+    # cost_min
+    # cost_max
+    # tags[] -> "tag1,tag2,tag3".split(',')
+    # location
+
+    # start_index
+    # total_count
+
+    search_query = dict()
+
+    location = request.args.get('location')
+    if location:
+        search_query["location"] = {"$eq": location}
+
+    price_conditions = []
+    cost_min = request.args.get('cost_min')
+    if cost_min is not None:
+        if cost_min.isdecimal():
+            price_conditions.append({"price_per_hour": {"$gte": int(cost_min)}})
+
+    cost_max = request.args.get('cost_max')
+    if cost_max is not None:
+        if cost_max.isdecimal():
+            price_conditions.append({"price_per_hour": {"$lte": int(cost_max)}})
+
+    if price_conditions:
+        search_query["$and"] = price_conditions
+
+    tags = request.args.getlist('tag')
+    if tags:
+        # Ensure all tags are valid UUIDs
+        for tag in tags:
+            try:
+                uuid.UUID(tag, version=4)
+            except ValueError:
+                return "Invalid tag id", 400
+        search_query["tags.uuid"] = {"$all": tags}
+
+
+    start_index = request.args.get('start_index')
+    if start_index is not None:
+        if start_index.isdecimal():
+            start_index = int(start_index)
+        else:
+            start_index = 0
+    else:
+        start_index = 0
+    
+    total_count = request.args.get('total_count')
+    if total_count is not None:
+        if total_count.isdecimal():
+            total_count = int(total_count)
+        else:
+            total_count = DEFAULT_RESULTS_COUNT
+    else:
+        total_count = DEFAULT_RESULTS_COUNT
+
+    found_lecturers: List[Dict[str, Any]] = list(lecturers.find(search_query).skip(start_index).limit(total_count))
+
+    # Renaming keys "_id" to "uuid" 
+    for i in range(len(found_lecturers)):
+        found_lecturers[i]['uuid'] = found_lecturers[i].pop('_id')
+
+    # return json.loads(json_util.dumps(found_lecturers)), 200
+    return render_template(
+        "lecturer_list.html", 
+        lecturers=found_lecturers, 
+        start_index=start_index, 
+        total_count=total_count, 
+        query_string=request.query_string.decode("utf-8"))

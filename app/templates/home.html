@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <script src="{{url_for('static', filename='script.js')}}"></script>
+    <link rel="stylesheet" href="{{url_for('static', filename='home.css')}}">
+    <link rel="icon" href="{{url_for('static', filename='favicon.svg')}}" type="image/svg+xml">
+    <title>Teacher digital Agency</title>
+</head>
+<body>
+    <div class="navbar">
+        <a href="/"><img class="logo" src="{{url_for('static', filename='logo.svg')}}" alt="logo"></a>
+    </div>
+    <div class="document">
+        <dialog id="filterModal">
+            <form id="filterModalForm">
+                <h2>Cena:</h2>
+                <p>
+                    <label for="cost_min">Minimální cena:</label>
+                    <input type="number" name="cost_min" id="cost_min" min="0" max="{{max_price}}">
+                </p>
+
+                <p>
+                    <label for="cost_max">Maximální cena:</label>
+                    <input type="number" name="cost_max" id="cost_max" min="0" max="{{max_price}}">
+                </p>
+
+                <h2>Tagy:</h2>
+                {% for tag in tags %}
+                <p>
+                    <input type="checkbox" name="tag" id="tag_{{tag.uuid}}" value="{{tag.uuid}}">
+                    <label for="tag_{{tag.uuid}}">#{{tag.name}}</label>
+                </p>
+                {% endfor %}
+
+                <h2>Město:</h2>
+                <p>
+                    <select name="location" id="location">
+                        <option value="">Všechna města</option>
+                        {% for location in locations %}
+                        <option value="{{location}}">{{location}}</option>
+                        {% endfor %}
+                    </select>
+                </p>
+
+                <div>
+                    <button type="submit" id="applyFilter">Filtrovat</button>
+                    <button formmethod="dialog" type="submit" id="closeModal">Zavřít</button>
+                </div>
+            </form>
+        </dialog>
+        <div class="filters">
+            <img src="{{url_for('static', filename='filter-solid.svg')}}" id="filterBtn">
+        </div>
+        <div class="lecturers">
+            <div
+                hx-get="/api/filter"
+                hx-trigger="revealed"
+                hx-swap="afterend">
+            </div>
+        </div>
+    </div>
+</body>
+</html>

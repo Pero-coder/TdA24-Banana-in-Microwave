@@ -1,12 +1,19 @@
-from flask import render_template
-from app import app
+from flask import render_template, redirect
+from app import app, api, utils
 
+
+@app.route("/lecturer/<string:uuid>")
+def lecturer(uuid: str):
+    lecturer = api.get_specific_lecturer(uuid.strip())
+    if lecturer[1] == 404:
+        return lecturer
+
+    return render_template("lecturer.html", **lecturer[0])
 
 @app.route("/lecturer")
-def lecturer():
-    return render_template("lecturer.html")
-
+def lecturer_empty():
+    return redirect('/')
 
 @app.route("/")
 def hello_world():
-    return "<p>Hello TdA</p>"
+    return render_template("home.html", tags=utils.get_all_tags(), locations=utils.get_all_locations(), max_price=utils.get_max_price())
