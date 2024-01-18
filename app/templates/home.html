@@ -20,12 +20,12 @@
                 <h2>Cena:</h2>
                 <p>
                     <label for="cost_min">Minimální cena:</label>
-                    <input type="number" name="cost_min" id="cost_min">
+                    <input type="number" name="cost_min" id="cost_min" min="0" max="{{max_price}}">
                 </p>
 
                 <p>
                     <label for="cost_max">Maximální cena:</label>
-                    <input type="number" name="cost_max" id="cost_max">
+                    <input type="number" name="cost_max" id="cost_max" min="0" max="{{max_price}}">
                 </p>
 
                 <h2>Tagy:</h2>

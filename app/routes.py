@@ -1,5 +1,5 @@
 from flask import render_template, redirect
-from app import app, api
+from app import app, api, utils
 
 
 @app.route("/lecturer/<string:uuid>")
@@ -16,4 +16,4 @@ def lecturer_empty():
 
 @app.route("/")
 def hello_world():
-    return render_template("home.html", tags=api.get_all_tags()[0], locations=api.get_all_locations()[0])
+    return render_template("home.html", tags=utils.get_all_tags(), locations=utils.get_all_locations(), max_price=utils.get_max_price())

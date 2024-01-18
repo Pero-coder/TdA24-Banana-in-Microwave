@@ -7,6 +7,18 @@ document.addEventListener('DOMContentLoaded', (e) => {
         filterModal.showModal();
     });
 
+    $('#cost_min, #cost_max').on('input', function() {
+        const min = parseInt($(this).attr('min'));
+        const max = parseInt($(this).attr('max'));
+        const value = parseInt($(this).val());
+
+        if (value < min) {
+            $(this).val(min);
+        } else if (value > max) {
+            $(this).val(max);
+        }
+    });
+
     applyFilter.addEventListener('click', (e) => {
         e.preventDefault();
         $('.lecturers').html(

@@ -11,4 +11,4 @@ client = MongoClient(
 app = Flask(__name__)
 db = client.test_database
 
-from app import routes, api
+from app import routes, api, utils
