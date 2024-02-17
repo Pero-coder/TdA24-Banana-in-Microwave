@@ -21,7 +21,9 @@
                         <p class="phone">{{phone}}</p>
                     {% endfor %}
                     {% for email in contact.emails %}
-                        <p class="email">{{email}}</p>
+                        <a href="mailto:{{email}}">
+                            <p class="email">{{email}}</p>
+                        </a>
                     {% endfor %}
                 </div>
             </div>
