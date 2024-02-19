@@ -13,6 +13,7 @@ DEFAULT_RESULTS_COUNT = 20
 
 
 lecturers = db.lecturers
+reservations = db.reservations
 tags = db.tags
 
 ALLOWED_TAGS = ['b', 'i', 'u', 'em', 'strong', 'a']
@@ -62,6 +63,11 @@ def api_lecturers():
 
             new_lecturer_json["_id"] = str(uuid.uuid4())
             lecturers.insert_one(new_lecturer_json)
+
+            reserved_hours = dict()
+            reserved_hours["_id"] = new_lecturer_json["_id"]
+            reserved_hours["free_hours"] = { str(hour): True for hour in range(8, 21) }
+            reservations.insert_one(reserved_hours)
 
             return get_specific_lecturer(new_lecturer_json["_id"])
 
@@ -218,3 +224,19 @@ def filter_lecturers():
         start_index=start_index, 
         total_count=total_count, 
         query_string=request.query_string.decode("utf-8"))
+
+
+# reservation API
+@app.route("/api/reservation/<string:uuid>", methods=["GET", "POST"])
+def reservation_system(uuid):
+
+    if request.method == 'GET':
+        # get lecturer's unreserved hours for a client
+
+        found_reservations = reservations.find_one({"_id": {"$eq": uuid}})
+        free_hours = json.loads(json_util.dumps(found_reservations))["free_hours"]
+        return free_hours, 200
+
+    elif request.method == 'POST':
+        # post client reservation details and selected time
+        request_json = request.get_json()
