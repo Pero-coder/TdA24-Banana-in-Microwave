@@ -227,7 +227,7 @@ def filter_lecturers():
 
 
 # reservation API
-@app.route("/api/reservation/<string:uuid>", methods=["GET", "POST"])
+@app.route("/api/reservation/<string:uuid>", methods=["GET", "POST", "DELETE"])
 def reservation_system(uuid):
 
     uuid_exists = bool(reservations.find_one({"_id": {"$eq": uuid}}))
@@ -265,10 +265,13 @@ def reservation_system(uuid):
             return {"code": 400, "message": "Invalid data"}, 400
         
 
-        lecturer_hours_info = json.loads(json_util.dumps(reservations.find_one({"_id": {"$eq": uuid}})))["teaching_hours"]
-        lecturer_hour_info = json.loads(json_util.dumps(lecturer_hours_info))[str(converted_time)]
+        lecturer_hours_info = reservations.find_one({"_id": {"$eq": uuid}})["teaching_hours"]
+        hour_info = lecturer_hours_info.get(str(converted_time))
+
+        if hour_info is None:
+            return {"code": 400, "message": "Time not available"}, 400
         
-        already_reserved = bool(json.loads(json_util.dumps(lecturer_hour_info))["reserved"])
+        already_reserved = bool(hour_info.get("reserved"))
 
         if already_reserved:
             return {"code": 400, "message": "Time already taken"}, 400
@@ -294,10 +297,40 @@ def reservation_system(uuid):
         if not utils.is_phone_number_valid(phone):
             return {"code": 400, "message": "Invalid number"}, 400
 
-        reservations.update_one({"_id": uuid}, {"$set": {
+        reservations.update_one({"_id": uuid, f"teaching_hours.{str(converted_time)}": {"$exists": True}}, {"$set": {
             f"teaching_hours.{str(converted_time)}.reserved": True,
             f"teaching_hours.{str(converted_time)}.client_email": email,
             f"teaching_hours.{str(converted_time)}.client_phone": phone}})
 
 
         return {"code": 200, "message": "Success"}, 200
+    
+    elif request.method == 'DELETE':
+        # delete reserved time
+
+        request_json: Dict = request.get_json()
+
+        # time validation
+        hour = request_json.get("hour")
+        if hour is not None:
+            try:
+                converted_time = int(hour)
+                if not (converted_time >= 8 and converted_time <= 20):
+                    return {"code": 400, "message": "Time not in a range"}, 400
+                
+            except:
+                return {"code": 400, "message": "Invalid data"}, 400
+        else:
+            return {"code": 400, "message": "Invalid data"}, 400
+
+        reservations.update_one({"_id": uuid, f"teaching_hours.{str(converted_time)}": {"$exists": True}}, {"$set": {
+                f"teaching_hours.{str(converted_time)}.reserved": False,
+                f"teaching_hours.{str(converted_time)}.client_email": None,
+                f"teaching_hours.{str(converted_time)}.client_phone": None
+            }}
+        )
+
+        return {"code": 200, "message": "Success"}, 200
+
+    else:
+        return {"code": 404, "message": "User not found"}, 404
