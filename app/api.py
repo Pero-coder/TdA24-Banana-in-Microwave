@@ -306,7 +306,7 @@ def reservation_system(uuid):
         return {"code": 200, "message": "Success"}, 200
     
     elif request.method == 'DELETE':
-        # delete reserved time
+        # reset reserved time
 
         request_json: Dict = request.get_json()
 
