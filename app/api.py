@@ -340,10 +340,24 @@ def reservation_system(uuid):
 # reservation API for lecturers
 @app.route("/api/reservation-admin/<string:uuid>", methods=["GET", "POST", "DELETE"])
 def reservation_system_admin(uuid):
-    
+
+    uuid_exists = bool(reservations.find_one({"_id": {"$eq": uuid}}))
+    if not uuid_exists:
+        return {"code": 404, "message": "User not found"}, 404
+
     if request.method == 'GET':
         # get all info about lecturer's reserved hours
-        pass
+
+        found_reservations = reservations.find_one({"_id": {"$eq": uuid}})
+        
+        try:
+            teaching_hours = found_reservations.get("teaching_hours")
+            only_hours_info = {k: v.get('reserved') for k, v in teaching_hours.items()}
+            return only_hours_info, 200
+        
+        except:
+            return {"code": 404, "message": "User not found"}, 404
+
 
     elif request.method == 'POST':
         # 
