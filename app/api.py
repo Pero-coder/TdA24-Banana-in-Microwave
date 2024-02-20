@@ -247,10 +247,9 @@ def reservation_system(uuid):
             return {"code": 404, "message": "User not found"}, 404
 
 
-
     elif request.method == 'POST':
         # post client reservation details and selected time
-        request_json = request.get_json()
+        request_json: Dict = request.get_json()
 
         # time validation
         hour = request_json.get("hour")
@@ -258,13 +257,23 @@ def reservation_system(uuid):
             try:
                 converted_time = int(hour)
                 if not (converted_time >= 8 and converted_time <= 20):
-                    return {"code": 400, "message": "Invalid data"}, 400
+                    return {"code": 400, "message": "Time not in a range"}, 400
                 
             except:
                 return {"code": 400, "message": "Invalid data"}, 400
         else:
             return {"code": 400, "message": "Invalid data"}, 400
         
+
+        lecturer_hours_info = json.loads(json_util.dumps(reservations.find_one({"_id": {"$eq": uuid}})))["teaching_hours"]
+        lecturer_hour_info = json.loads(json_util.dumps(lecturer_hours_info))[str(converted_time)]
+        
+        already_reserved = bool(json.loads(json_util.dumps(lecturer_hour_info))["reserved"])
+
+        if already_reserved:
+            return {"code": 400, "message": "Time already taken"}, 400
+        
+
         # email validation
         email = request_json.get("email")
         if email is None:
@@ -273,7 +282,7 @@ def reservation_system(uuid):
             email = str(email).strip()
         
         if not utils.is_email_valid(email):
-            return {"code": 400, "message": "Invalid data"}, 400
+            return {"code": 400, "message": "Invalid email"}, 400
 
         # phone number validation
         phone = request_json.get("phone")
@@ -283,9 +292,12 @@ def reservation_system(uuid):
             phone = str(phone).replace(' ', '')
 
         if not utils.is_phone_number_valid(phone):
-            return {"code": 400, "message": "Invalid data"}, 400
+            return {"code": 400, "message": "Invalid number"}, 400
 
-        reservations.update_one({"_id": uuid, "teaching_hours": str(converted_time)}, {"$set": {"reserved": True, "client_email": email, "client_phone": phone}})
+        reservations.update_one({"_id": uuid}, {"$set": {
+            f"teaching_hours.{str(converted_time)}.reserved": True,
+            f"teaching_hours.{str(converted_time)}.client_email": email,
+            f"teaching_hours.{str(converted_time)}.client_phone": phone}})
 
 
-        return "", 200
+        return {"code": 200, "message": "Success"}, 200
