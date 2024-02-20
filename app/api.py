@@ -434,3 +434,9 @@ def reservation_system_admin(uuid):
 
 
     return {"code": 405, "message": "Method not allowed"}, 405
+
+
+@app.route("/api/lecturer-login", methods=["POST"])
+def lecturer_login():
+    # TODO: implement
+    return "", 200

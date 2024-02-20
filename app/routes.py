@@ -18,6 +18,10 @@ def lecturer_empty():
 def lecturer_zone():
     return render_template("lecturer_zone.html")
 
+@app.route("/lecturer_zone_login")
+def lecturer_zone_login():
+    return render_template("lecturer_zone_login.html")
+
 @app.route("/")
 def hello_world():
     return render_template("home.html", tags=utils.get_all_tags(), locations=utils.get_all_locations(), max_price=utils.get_max_price())
