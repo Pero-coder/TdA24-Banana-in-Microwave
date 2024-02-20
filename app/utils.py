@@ -43,5 +43,5 @@ def is_phone_number_valid(phone_number: str) -> bool:
     # works only without whitespaces
     clean_phone_number = phone_number.replace(' ', '')
     
-    regex = re.compile(r'([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,})+')
+    regex = re.compile(r'^(?:\+420|\+421)? ?\d{9}$')
     return bool(re.fullmatch(regex, clean_phone_number))
