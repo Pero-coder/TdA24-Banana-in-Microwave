@@ -312,11 +312,16 @@ def reservation_system(uuid):
 # reservation API for lecturers
 @app.route("/api/reservation-admin/<string:uuid>", methods=["GET", "POST", "DELETE", "PUT"])
 def reservation_system_admin(uuid):
-    # requires authentification token
+    # requires auth token
 
     uuid_exists = bool(reservations.find_one({"_id": {"$eq": uuid}}))
     if not uuid_exists:
         return {"code": 404, "message": "User not found"}, 404
+
+
+    # TODO: check auth token with UUID
+
+
 
     if request.method == 'GET':
         # get full info about lecturer's reserved hours
