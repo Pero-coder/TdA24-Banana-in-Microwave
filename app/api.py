@@ -399,9 +399,9 @@ def reservation_system_admin(uuid):
 
         return {"code": 200, "message": "Success"}, 200
     
-    
+
     elif request.method == 'PUT':
-        # reset reserved time
+        # reset any reserved time
 
         request_json: Dict = request.get_json() # {"hour": "8"}
 
