@@ -1,5 +1,5 @@
 from app import app, db, utils
-from flask import render_template, request
+from flask import render_template, request, redirect
 
 from app.models import NewLecturer, EditLecturer, Tag
 from pydantic import ValidationError
@@ -439,4 +439,5 @@ def reservation_system_admin(uuid):
 @app.route("/api/lecturer-login", methods=["POST"])
 def lecturer_login():
     # TODO: implement
-    return "", 200
+    
+    return redirect('/lecturer-zone')
