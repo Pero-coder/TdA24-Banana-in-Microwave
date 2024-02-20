@@ -14,6 +14,10 @@ def lecturer(uuid: str):
 def lecturer_empty():
     return redirect('/')
 
+@app.route("/lecturer_zone")
+def lecturer_zone():
+    return render_template("lecturer_zone.html")
+
 @app.route("/")
 def hello_world():
     return render_template("home.html", tags=utils.get_all_tags(), locations=utils.get_all_locations(), max_price=utils.get_max_price())
