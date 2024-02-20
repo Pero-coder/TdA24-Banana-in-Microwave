@@ -249,7 +249,7 @@ def reservation_system(uuid):
 
     elif request.method == 'POST':
         # post client reservation details and selected time
-        request_json: Dict = request.get_json()
+        request_json: Dict = request.get_json() # {"hour": "8", "email": "test@example.com", "phone": "+420123456789"}
 
         # time validation
         hour = request_json.get("hour")
@@ -308,7 +308,7 @@ def reservation_system(uuid):
     elif request.method == 'DELETE':
         # reset reserved time
 
-        request_json: Dict = request.get_json()
+        request_json: Dict = request.get_json() # {"hour": "8"}
 
         # time validation
         hour = request_json.get("hour")
