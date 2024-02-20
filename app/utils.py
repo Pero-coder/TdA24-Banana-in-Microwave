@@ -1,6 +1,6 @@
 from app import db
 from typing import List, Dict
-
+import re
 
 lecturers = db.lecturers
 tags = db.tags
@@ -30,3 +30,16 @@ def get_max_price():
             max_price = lecturer["price_per_hour"]
 
     return max_price
+
+def is_email_valid(email: str) -> bool:
+    # source: https://stackabuse.com/python-validate-email-address-with-regular-expressions-regex/
+
+    regex = re.compile(r'([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,})+')
+    return bool(re.fullmatch(regex, email))
+
+def is_phone_number_valid(phone_number: str) -> bool:
+    # source: https://regex101.com/library/sI9bU6
+    # works only without whitespaces!
+
+    regex = re.compile(r'([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,})+')
+    return bool(re.fullmatch(regex, phone_number))
