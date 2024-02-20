@@ -235,20 +235,21 @@ def reservation_system(uuid):
         return {"code": 404, "message": "User not found"}, 404
 
     if request.method == 'GET':
-        # get lecturer's info about reserved hours
+        # get lecturer's info only about hours
 
         found_reservations = reservations.find_one({"_id": {"$eq": uuid}})
         
         try:
-            teaching_hours = json.loads(json_util.dumps(found_reservations))["teaching_hours"]
-            return teaching_hours, 200
+            teaching_hours = found_reservations.get("teaching_hours")
+            only_hours_info = {k: v.get('reserved') for k, v in teaching_hours.items()}
+            return only_hours_info, 200
         
         except:
             return {"code": 404, "message": "User not found"}, 404
 
 
     elif request.method == 'POST':
-        # post client reservation details and selected time
+        # book a time (client)
         request_json: Dict = request.get_json() # {"hour": "8", "email": "test@example.com", "phone": "+420123456789"}
 
         # time validation
@@ -334,3 +335,22 @@ def reservation_system(uuid):
 
     else:
         return {"code": 404, "message": "User not found"}, 404
+    
+
+# reservation API for lecturers
+@app.route("/api/reservation-admin/<string:uuid>", methods=["GET", "POST", "DELETE"])
+def reservation_system_admin(uuid):
+    
+    if request.method == 'GET':
+        # get all info about lecturer's reserved hours
+        pass
+
+    elif request.method == 'POST':
+        # 
+        pass
+    
+    elif request.method == 'DELETE':
+        # remove time from available times
+        pass
+
+    return "", 200
