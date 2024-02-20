@@ -38,8 +38,6 @@ def is_email_valid(email: str) -> bool:
     return bool(re.fullmatch(regex, email))
 
 def is_phone_number_valid(phone_number: str) -> bool:
-    # source: https://regex101.com/library/sI9bU6
-
     # works only without whitespaces
     clean_phone_number = phone_number.replace(' ', '')
     
