@@ -333,8 +333,8 @@ def reservation_system(uuid):
 
         return {"code": 200, "message": "Success"}, 200
 
-    else:
-        return {"code": 404, "message": "User not found"}, 404
+
+    return {"code": 403, "message": "Method not allowed"}, 403
     
 
 # reservation API for lecturers
@@ -367,4 +367,5 @@ def reservation_system_admin(uuid):
         # remove time from available times
         pass
 
-    return "", 200
+
+    return {"code": 403, "message": "Method not allowed"}, 403
