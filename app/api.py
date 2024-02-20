@@ -334,7 +334,7 @@ def reservation_system(uuid):
         return {"code": 200, "message": "Success"}, 200
 
 
-    return {"code": 403, "message": "Method not allowed"}, 403
+    return {"code": 405, "message": "Method not allowed"}, 405
     
 
 # reservation API for lecturers
@@ -368,4 +368,4 @@ def reservation_system_admin(uuid):
         pass
 
 
-    return {"code": 403, "message": "Method not allowed"}, 403
+    return {"code": 405, "message": "Method not allowed"}, 405
