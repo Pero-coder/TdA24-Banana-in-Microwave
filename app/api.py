@@ -352,15 +352,14 @@ def reservation_system_admin(uuid):
         
         try:
             teaching_hours = found_reservations.get("teaching_hours")
-            only_hours_info = {k: v.get('reserved') for k, v in teaching_hours.items()}
-            return only_hours_info, 200
+            return teaching_hours, 200
         
         except:
             return {"code": 404, "message": "User not found"}, 404
 
 
     elif request.method == 'POST':
-        # 
+        # add time to available times
         pass
     
     elif request.method == 'DELETE':
