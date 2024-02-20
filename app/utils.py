@@ -39,7 +39,9 @@ def is_email_valid(email: str) -> bool:
 
 def is_phone_number_valid(phone_number: str) -> bool:
     # source: https://regex101.com/library/sI9bU6
-    # works only without whitespaces!
 
+    # works only without whitespaces
+    clean_phone_number = phone_number.replace(' ', '')
+    
     regex = re.compile(r'([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,})+')
-    return bool(re.fullmatch(regex, phone_number))
+    return bool(re.fullmatch(regex, clean_phone_number))
