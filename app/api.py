@@ -1,4 +1,4 @@
-from app import app, db
+from app import app, db, utils
 from flask import render_template, request
 
 from app.models import NewLecturer, EditLecturer, Tag
@@ -66,7 +66,7 @@ def api_lecturers():
 
             reserved_hours = dict()
             reserved_hours["_id"] = new_lecturer_json["_id"]
-            reserved_hours["free_hours"] = { str(hour): True for hour in range(8, 21) }
+            reserved_hours["teaching_hours"] = { str(hour): {"reserved": False, "client_email": None, "client_phone": None} for hour in range(8, 21) }
             reservations.insert_one(reserved_hours)
 
             return get_specific_lecturer(new_lecturer_json["_id"])
@@ -230,13 +230,62 @@ def filter_lecturers():
 @app.route("/api/reservation/<string:uuid>", methods=["GET", "POST"])
 def reservation_system(uuid):
 
+    uuid_exists = bool(reservations.find_one({"_id": {"$eq": uuid}}))
+    if not uuid_exists:
+        return {"code": 404, "message": "User not found"}, 404
+
     if request.method == 'GET':
-        # get lecturer's unreserved hours for a client
+        # get lecturer's info about reserved hours
 
         found_reservations = reservations.find_one({"_id": {"$eq": uuid}})
-        free_hours = json.loads(json_util.dumps(found_reservations))["free_hours"]
-        return free_hours, 200
+        
+        try:
+            teaching_hours = json.loads(json_util.dumps(found_reservations))["teaching_hours"]
+            return teaching_hours, 200
+        
+        except:
+            return {"code": 404, "message": "User not found"}, 404
+
+
 
     elif request.method == 'POST':
         # post client reservation details and selected time
         request_json = request.get_json()
+
+        # time validation
+        hour = request_json.get("hour")
+        if hour is not None:
+            try:
+                converted_time = int(hour)
+                if not (converted_time >= 8 and converted_time <= 20):
+                    return {"code": 400, "message": "Invalid data"}, 400
+                
+            except:
+                return {"code": 400, "message": "Invalid data"}, 400
+        else:
+            return {"code": 400, "message": "Invalid data"}, 400
+        
+        # email validation
+        email = request_json.get("email")
+        if email is None:
+            return {"code": 400, "message": "Invalid data"}, 400
+        else:
+            email = str(email).strip()
+        
+        if not utils.is_email_valid(email):
+            return {"code": 400, "message": "Invalid data"}, 400
+
+        # phone number validation
+        phone = request_json.get("phone")
+        if phone is None:
+            return {"code": 400, "message": "Invalid data"}, 400
+        else:
+            phone = str(phone).replace(' ', '')
+
+        if not utils.is_phone_number_valid(phone):
+            return {"code": 400, "message": "Invalid data"}, 400
+
+        reservations.update_one({"_id": uuid, "teaching_hours": str(converted_time)}, {"$set": {"reserved": True, "client_email": email, "client_phone": phone}})
+
+
+        return "", 200
