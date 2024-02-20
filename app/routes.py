@@ -14,11 +14,11 @@ def lecturer(uuid: str):
 def lecturer_empty():
     return redirect('/')
 
-@app.route("/lecturer_zone")
+@app.route("/lecturer-zone")
 def lecturer_zone():
     return render_template("lecturer_zone.html")
 
-@app.route("/lecturer_zone_login")
+@app.route("/lecturer-zone-login")
 def lecturer_zone_login():
     return render_template("lecturer_zone_login.html")
 
