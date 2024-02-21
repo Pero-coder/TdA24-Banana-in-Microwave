@@ -1,5 +1,5 @@
 from app import app, db, utils
-from flask import render_template, request, redirect
+from flask import render_template, request, redirect, make_response, session
 
 from app.models import NewLecturer, EditLecturer, Tag
 from pydantic import ValidationError
@@ -468,7 +468,10 @@ def lecturer_login():
     if not bool(lecturer_credentials):
         return {"code": 401, "message": "Wrong username or password"}, 401
     
+
     lecturer_uuid = lecturer_credentials.get("_id")
+    session["logged_in"] = True
 
     return lecturer_uuid, 200
+
     #return redirect('/lecturer-zone')

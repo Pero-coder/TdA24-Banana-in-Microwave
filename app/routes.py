@@ -1,4 +1,4 @@
-from flask import render_template, redirect
+from flask import render_template, redirect, session
 from app import app, api, utils
 
 
@@ -16,6 +16,10 @@ def lecturer_empty():
 
 @app.route("/lecturer-zone")
 def lecturer_zone():
+
+    if 'logged_in' not in session or not bool(session.get("logged_in")):
+        return redirect("/lecturer-zone-login")
+
     return render_template("lecturer_zone.html")
 
 @app.route("/lecturer-zone-login")
