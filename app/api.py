@@ -15,6 +15,7 @@ DEFAULT_RESULTS_COUNT = 20
 lecturers = db.lecturers
 reservations = db.reservations
 tags = db.tags
+credentials = db.credentials
 
 ALLOWED_TAGS = ['b', 'i', 'u', 'em', 'strong', 'a']
 
@@ -435,9 +436,39 @@ def reservation_system_admin(uuid):
 
     return {"code": 405, "message": "Method not allowed"}, 405
 
+@app.route("/api/add-lecturer-login/<string:uuid>", methods=["POST"])
+def add_lecturer_login(uuid):
+    request_data = request.get_json()
+
+    username = request_data.get("username")
+    password = request_data.get("password")
+
+    hashed_password = utils.hash_password_sha256(password)
+
+    credentials.insert_one({"_id": uuid, "username": username, "hashed_password": hashed_password})
+
+    return {"code": 200, "message": "Success"}, 200
 
 @app.route("/api/lecturer-login", methods=["POST"])
 def lecturer_login():
-    # TODO: implement
+
+    request_data = request.get_json()
     
-    return redirect('/lecturer-zone')
+    username: str|None = request_data.get("username")
+    hashed_password: str|None = request_data.get("hashed_password")
+
+    if username is None or hashed_password is None:
+        return {"code": 401, "message": "Wrong username or password"}, 401
+    
+    username = username.strip()
+    hashed_password = hashed_password.strip()
+
+    lecturer_credentials = credentials.find_one({"username": {"$eq": username}, "hashed_password": {"$eq": hashed_password}})
+    
+    if not bool(lecturer_credentials):
+        return {"code": 401, "message": "Wrong username or password"}, 401
+    
+    lecturer_uuid = lecturer_credentials.get("_id")
+
+    return lecturer_uuid, 200
+    #return redirect('/lecturer-zone')
