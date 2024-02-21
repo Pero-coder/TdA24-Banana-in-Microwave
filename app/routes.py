@@ -16,14 +16,16 @@ def lecturer_empty():
 
 @app.route("/lecturer-zone")
 def lecturer_zone():
-
-    if 'logged_in' not in session or not bool(session.get("logged_in")):
+    if not bool(session.get("logged_in")):
         return redirect("/lecturer-login")
 
     return render_template("lecturer_zone.html")
 
 @app.route("/lecturer-login")
 def lecturer_zone_login():
+    if bool(session.get("logged_in")):
+        return redirect("/lecturer-zone")
+    
     return render_template("lecturer_login.html")
 
 @app.route("/lecturer-logout")
