@@ -1,5 +1,5 @@
 from app import app, db, utils
-from flask import render_template, request, redirect, make_response, session
+from flask import render_template, request, session
 
 from app.models import NewLecturer, EditLecturer, Tag
 from pydantic import ValidationError
@@ -435,19 +435,6 @@ def reservation_system_admin(uuid):
 
 
     return {"code": 405, "message": "Method not allowed"}, 405
-
-@app.route("/api/add-lecturer-login/<string:uuid>", methods=["POST"])
-def add_lecturer_login(uuid):
-    request_data = request.get_json()
-
-    username = request_data.get("username")
-    password = request_data.get("password")
-
-    hashed_password = utils.hash_password_sha256(password)
-
-    credentials.insert_one({"_id": uuid, "username": username, "hashed_password": hashed_password})
-
-    return {"code": 200, "message": "Success"}, 200
 
 @app.route("/api/lecturer-login", methods=["POST"])
 def lecturer_login():
