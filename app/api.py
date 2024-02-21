@@ -1,5 +1,5 @@
 from app import app, db, utils
-from flask import render_template, request, session
+from flask import render_template, request, session, redirect
 
 from app.models import NewLecturer, EditLecturer, Tag
 from pydantic import ValidationError
@@ -439,29 +439,31 @@ def reservation_system_admin(uuid):
 @app.route("/api/lecturer-login", methods=["POST"])
 def lecturer_login():
 
-    request_data = request.get_json()
-    
-    username: str|None = request_data.get("username")
-    hashed_password: str|None = request_data.get("hashed_password")
+    if request.method == "POST":
+        request_data = request.get_json()
+        
+        username: str|None = request_data.get("username")
+        hashed_password: str|None = request_data.get("hashed_password")
 
-    if username is None or hashed_password is None:
-        return {"code": 401, "message": "Wrong username or password"}, 401
-    
-    username = username.strip()
-    hashed_password = hashed_password.strip()
+        if username is None or hashed_password is None:
+            return {"code": 401, "message": "Wrong username or password"}, 401
+        
+        username = username.strip()
+        hashed_password = hashed_password.strip()
 
-    if username == '' or hashed_password == '':
-        return {"code": 401, "message": "Wrong username or password"}, 401
+        if username == '' or hashed_password == '':
+            return {"code": 401, "message": "Wrong username or password"}, 401
 
-    lecturer_credentials = credentials.find_one({"username": {"$eq": username}, "hashed_password": {"$eq": hashed_password}})
-    
-    if not bool(lecturer_credentials):
-        return {"code": 401, "message": "Wrong username or password"}, 401
-    
+        lecturer_credentials = credentials.find_one({"username": {"$eq": username}, "hashed_password": {"$eq": hashed_password}})
+        
+        if not bool(lecturer_credentials):
+            return {"code": 401, "message": "Wrong username or password"}, 401
+        
 
-    lecturer_uuid = lecturer_credentials.get("_id")
-    session["logged_in"] = True
+        lecturer_uuid = lecturer_credentials.get("_id")
+        session["logged_in"] = True
+        session["lecturer_uuid"] = lecturer_uuid
 
-    return lecturer_uuid, 200
+        return redirect('/lecturer-zone')
 
-    #return redirect('/lecturer-zone')
+    return {"code": 405, "message": "Method not allowed"}, 405
