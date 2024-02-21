@@ -24,7 +24,7 @@ def lecturer_zone():
 
 @app.route("/lecturer-login")
 def lecturer_zone_login():
-    return render_template("lecturer_zone_login.html")
+    return render_template("lecturer_login.html")
 
 @app.route("/lecturer-logout")
 def logout_lecturer():
