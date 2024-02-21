@@ -1,6 +1,7 @@
-from flask import render_template, redirect, session
-from app import app, api, utils
+from flask import render_template, redirect, session, request
+from app import app, api, utils, db
 
+credentials = db.credentials
 
 @app.route("/lecturer/<string:uuid>")
 def lecturer(uuid: str):
@@ -21,12 +22,45 @@ def lecturer_zone():
 
     return render_template("lecturer_zone.html")
 
-@app.route("/lecturer-login")
-def lecturer_zone_login():
+
+@app.route("/lecturer-login", methods=["GET", "POST"])
+def lecturer_login():
+
     if bool(session.get("logged_in")):
         return redirect("/lecturer-zone")
-    
-    return render_template("lecturer_login.html")
+
+    if request.method == "GET":
+        return render_template("lecturer_login.html")
+
+    elif request.method == "POST":
+        
+        username: str|None = request.form.get("username")
+        password: str|None = request.form.get("password")
+
+        if username is None or password is None:
+            return {"code": 401, "message": "Wrong username or password"}, 401
+        
+        username = username.strip()
+        password = password.strip()
+        hashed_password = utils.hash_password_sha256(password)
+
+        if username == '' or hashed_password == '':
+            return {"code": 401, "message": "Wrong username or password"}, 401
+
+        lecturer_credentials = credentials.find_one({"username": {"$eq": username}, "hashed_password": {"$eq": hashed_password}})
+        
+        if not bool(lecturer_credentials):
+            return {"code": 401, "message": "Wrong username or password"}, 401
+        
+
+        lecturer_uuid = lecturer_credentials.get("_id")
+        session["logged_in"] = True
+        session["lecturer_uuid"] = lecturer_uuid
+
+        return redirect('/lecturer-zone')
+
+    return {"code": 405, "message": "Method not allowed"}, 405
+
 
 @app.route("/lecturer-logout")
 def logout_lecturer():
