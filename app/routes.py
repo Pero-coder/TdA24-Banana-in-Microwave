@@ -30,7 +30,7 @@ def lecturer_zone_login():
 
 @app.route("/lecturer-logout")
 def logout_lecturer():
-    session["logged_in"] = False
+    session.clear() # delete cookies
     return redirect('/lecturer-login')
 
 @app.route("/")
