@@ -443,13 +443,14 @@ def lecturer_login():
         request_data = request.get_json()
         
         username: str|None = request_data.get("username")
-        hashed_password: str|None = request_data.get("hashed_password")
+        password: str|None = request_data.get("password")
 
-        if username is None or hashed_password is None:
+        if username is None or password is None:
             return {"code": 401, "message": "Wrong username or password"}, 401
         
         username = username.strip()
-        hashed_password = hashed_password.strip()
+        password = password.strip()
+        hashed_password = utils.hash_password_sha256(password)
 
         if username == '' or hashed_password == '':
             return {"code": 401, "message": "Wrong username or password"}, 401
