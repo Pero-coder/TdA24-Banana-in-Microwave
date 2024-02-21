@@ -5,7 +5,7 @@ import hashlib
 
 lecturers = db.lecturers
 tags = db.tags
-
+credentials = db.credentials
 
 def get_all_tags():
     existing_tags: List[Dict] = list()
@@ -46,7 +46,11 @@ def is_phone_number_valid(phone_number: str) -> bool:
     return bool(re.fullmatch(regex, clean_phone_number))
 
 
-def hash_password_sha256(password):
+def hash_password_sha256(password: str) -> str:
     sha256 = hashlib.sha256()
     sha256.update(password.encode('utf-8'))
     return sha256.hexdigest()
+
+def add_user_credentials_to_db(uuid: str, username: str, password: str) -> bool:
+    hashed_password = hash_password_sha256(password)
+    credentials.insert_one({"_id": uuid, "username": username, "hashed_password": hashed_password})
