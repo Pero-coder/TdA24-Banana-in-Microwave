@@ -463,6 +463,9 @@ def lecturer_login():
     username = username.strip()
     hashed_password = hashed_password.strip()
 
+    if username == '' or hashed_password == '':
+        return {"code": 401, "message": "Wrong username or password"}, 401
+
     lecturer_credentials = credentials.find_one({"username": {"$eq": username}, "hashed_password": {"$eq": hashed_password}})
     
     if not bool(lecturer_credentials):
