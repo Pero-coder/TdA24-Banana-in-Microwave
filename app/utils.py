@@ -1,6 +1,7 @@
 from app import db
 from typing import List, Dict
 import re
+import hashlib
 
 lecturers = db.lecturers
 tags = db.tags
@@ -43,3 +44,9 @@ def is_phone_number_valid(phone_number: str) -> bool:
     
     regex = re.compile(r'^(?:\+420|\+421)? ?\d{9}$')
     return bool(re.fullmatch(regex, clean_phone_number))
+
+
+def hash_password_sha256(password):
+    sha256 = hashlib.sha256()
+    sha256.update(password.encode('utf-8'))
+    return sha256.hexdigest()
