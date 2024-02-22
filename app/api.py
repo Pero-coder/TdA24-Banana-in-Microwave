@@ -84,9 +84,9 @@ def api_lecturers():
     return json.loads(json_util.dumps(found_lecturers)), 200
 
 
-@app.route("/api/lecturers/<string:uuid>", methods=["GET"])
-def get_specific_lecturer(uuid: str):
-    found_lecturer = lecturers.find_one({"_id": {"$eq": uuid}})
+@app.route("/api/lecturers/<string:lecturer_uuid>", methods=["GET"])
+def get_specific_lecturer(lecturer_uuid: str):
+    found_lecturer = lecturers.find_one({"_id": {"$eq": lecturer_uuid}})
 
     if found_lecturer is None:
         return {"code": 404, "message": "User not found"}, 404
@@ -95,9 +95,9 @@ def get_specific_lecturer(uuid: str):
         return json.loads(json_util.dumps(found_lecturer)), 200
 
 
-@app.route("/api/lecturers/<string:uuid>", methods=["DELETE"])
-def delete_lecturer(uuid):
-    deleted = bool(lecturers.delete_one({"_id": {"$eq": uuid}}).deleted_count)
+@app.route("/api/lecturers/<string:lecturer_uuid>", methods=["DELETE"])
+def delete_lecturer(lecturer_uuid):
+    deleted = bool(lecturers.delete_one({"_id": {"$eq": lecturer_uuid}}).deleted_count)
 
     if deleted:
         return '', 204
@@ -228,17 +228,17 @@ def filter_lecturers():
 
 
 # reservation API
-@app.route("/api/reservation/<string:uuid>", methods=["GET", "POST", "DELETE"])
-def reservation_system(uuid):
+@app.route("/api/reservation/<string:lecturer_uuid>", methods=["GET", "POST", "DELETE"])
+def reservation_system(lecturer_uuid):
 
-    uuid_exists = bool(reservations.find_one({"_id": {"$eq": uuid}}))
+    uuid_exists = bool(reservations.find_one({"_id": {"$eq": lecturer_uuid}}))
     if not uuid_exists:
         return {"code": 404, "message": "User not found"}, 404
 
     if request.method == 'GET':
         # get lecturer's info only about hours
 
-        found_reservations = reservations.find_one({"_id": {"$eq": uuid}})
+        found_reservations = reservations.find_one({"_id": {"$eq": lecturer_uuid}})
         
         try:
             teaching_hours = found_reservations.get("teaching_hours")
@@ -267,7 +267,7 @@ def reservation_system(uuid):
             return {"code": 400, "message": "Invalid data"}, 400
         
 
-        lecturer_hours_info = reservations.find_one({"_id": {"$eq": uuid}})["teaching_hours"]
+        lecturer_hours_info = reservations.find_one({"_id": {"$eq": lecturer_uuid}})["teaching_hours"]
         hour_info = lecturer_hours_info.get(str(converted_time))
 
         if hour_info is None:
@@ -299,7 +299,7 @@ def reservation_system(uuid):
         if not utils.is_phone_number_valid(phone):
             return {"code": 400, "message": "Invalid number"}, 400
 
-        reservations.update_one({"_id": uuid, f"teaching_hours.{str(converted_time)}": {"$exists": True}}, {"$set": {
+        reservations.update_one({"_id": lecturer_uuid, f"teaching_hours.{str(converted_time)}": {"$exists": True}}, {"$set": {
             f"teaching_hours.{str(converted_time)}.reserved": True,
             f"teaching_hours.{str(converted_time)}.client_email": email,
             f"teaching_hours.{str(converted_time)}.client_phone": phone}})
@@ -311,23 +311,27 @@ def reservation_system(uuid):
     
 
 # reservation API for lecturers
-@app.route("/api/reservation-admin/<string:uuid>", methods=["GET", "POST", "DELETE", "PUT"])
-def reservation_system_admin(uuid):
-    # requires auth token
+@app.route("/api/reservation-admin/", methods=["GET", "POST", "DELETE", "PUT"])
+def reservation_system_admin():
 
-    uuid_exists = bool(reservations.find_one({"_id": {"$eq": uuid}}))
-    if not uuid_exists:
+    # Check login status
+    if not bool(session.get("logged_in")):
+        return redirect("/lecturer-login")
+
+    lecturer_uuid = session.get("uuid")
+
+    if lecturer_uuid is None:
         return {"code": 404, "message": "User not found"}, 404
 
-
-    # TODO: check auth token with UUID
-
+    uuid_exists = bool(reservations.find_one({"_id": {"$eq": lecturer_uuid}}))
+    if not uuid_exists:
+        return {"code": 404, "message": "User not found"}, 404
 
 
     if request.method == 'GET':
         # get full info about lecturer's reserved hours
 
-        found_reservations = reservations.find_one({"_id": {"$eq": uuid}})
+        found_reservations = reservations.find_one({"_id": {"$eq": lecturer_uuid}})
         
         try:
             teaching_hours = found_reservations.get("teaching_hours")
@@ -356,13 +360,13 @@ def reservation_system_admin(uuid):
             return {"code": 400, "message": "Invalid data"}, 400
 
 
-        lecturer_hours_info = reservations.find_one({"_id": {"$eq": uuid}})["teaching_hours"]
+        lecturer_hours_info = reservations.find_one({"_id": {"$eq": lecturer_uuid}})["teaching_hours"]
         hour_exists = bool(lecturer_hours_info.get(str(converted_time)))
 
         if hour_exists:
             return {"code": 200, "message": "Success - already exists"}, 200
         
-        reservations.update_one({"_id": uuid, f"teaching_hours.{str(converted_time)}": {"$exists": False}}, {"$set": {
+        reservations.update_one({"_id": lecturer_uuid, f"teaching_hours.{str(converted_time)}": {"$exists": False}}, {"$set": {
                 f"teaching_hours.{str(converted_time)}.reserved": False,
                 f"teaching_hours.{str(converted_time)}.client_email": None,
                 f"teaching_hours.{str(converted_time)}.client_phone": None
@@ -391,7 +395,7 @@ def reservation_system_admin(uuid):
             return {"code": 400, "message": "Invalid data"}, 400
 
 
-        lecturer_hours_info = reservations.find_one({"_id": {"$eq": uuid}})["teaching_hours"]
+        lecturer_hours_info = reservations.find_one({"_id": {"$eq": lecturer_uuid}})["teaching_hours"]
         hour_exists = bool(lecturer_hours_info.get(str(converted_time)))
 
         if not hour_exists:
@@ -399,7 +403,7 @@ def reservation_system_admin(uuid):
         
         # delete
         reservations.update_one(
-            {"_id": {"$eq": uuid}},
+            {"_id": {"$eq": lecturer_uuid}},
             {"$unset": {f"teaching_hours.{converted_time}": 1}}
         )
 
@@ -424,7 +428,7 @@ def reservation_system_admin(uuid):
         else:
             return {"code": 400, "message": "Invalid data"}, 400
 
-        reservations.update_one({"_id": uuid, f"teaching_hours.{str(converted_time)}": {"$exists": True}}, {"$set": {
+        reservations.update_one({"_id": lecturer_uuid, f"teaching_hours.{str(converted_time)}": {"$exists": True}}, {"$set": {
                 f"teaching_hours.{str(converted_time)}.reserved": False,
                 f"teaching_hours.{str(converted_time)}.client_email": None,
                 f"teaching_hours.{str(converted_time)}.client_phone": None
