@@ -9,7 +9,7 @@ def lecturer(uuid: str):
     if lecturer[1] == 404:
         return lecturer
 
-    return render_template("lecturer.html", **lecturer[0])
+    return render_template("lecturer.html", **lecturer[0], lecturer_uuid = uuid.strip())
 
 @app.route("/lecturer")
 def lecturer_empty():

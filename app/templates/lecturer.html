@@ -28,8 +28,42 @@
                     
                     
                     <div style="text-align: center; margin-top: 15%;">
-                        <button onclick="alert('ahoj')" style="font-size: 18px; padding: 7px;">Zarezervovat</button>
+                        <button onclick="reserve()" style="font-size: 18px; padding: 7px;">Zarezervovat</button>
                     </div>
+
+                    <script>
+                        function reserve() {        
+                            let hour = prompt("Zadejte hodinu:");
+                            let phone = prompt("Zadejte telefon:");
+                            let email = prompt("Zadejte email:");
+                        
+                            let data = {
+                                phone: phone,
+                                email: email,
+                                hour: hour
+                            };
+                        
+                            fetch('/api/reservation/{{lecturer_uuid}}', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify(data),
+                            })
+                            .then(response => {
+                                if (response.status === 200) {
+                                    alert('V pořádku');
+                                } else {
+                                    return response.json().then(data => {
+                                        alert(JSON.stringify(data["message"]));
+                                    });
+                                }
+                            })
+                            .catch((error) => {
+                                alert('Error: ' + error);
+                            });
+                        }
+                        </script>
                 </div>
 
             </div>
