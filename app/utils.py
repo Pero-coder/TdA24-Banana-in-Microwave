@@ -1,7 +1,7 @@
 from app import db
 from typing import List, Dict
 import re
-import hashlib
+import bcrypt
 
 lecturers = db.lecturers
 tags = db.tags
@@ -46,11 +46,10 @@ def is_phone_number_valid(phone_number: str) -> bool:
     return bool(re.fullmatch(regex, clean_phone_number))
 
 
-def hash_password_sha256(password: str) -> str:
-    sha256 = hashlib.sha256()
-    sha256.update(password.encode('utf-8'))
-    return sha256.hexdigest()
+def hash_password_bcrypt(password: str) -> str:
+    hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+    return hashed.decode('utf-8')
 
 def add_user_credentials_to_db(uuid: str, username: str, password: str) -> bool:
-    hashed_password = hash_password_sha256(password)
+    hashed_password = hash_password_bcrypt(password)
     credentials.insert_one({"_id": uuid, "username": username, "hashed_password": hashed_password})
