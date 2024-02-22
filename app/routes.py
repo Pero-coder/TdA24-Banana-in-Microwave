@@ -42,7 +42,7 @@ def lecturer_login():
         
         username = username.strip()
         password = password.strip()
-        hashed_password = utils.hash_password_sha256(password)
+        hashed_password = utils.hash_password_bcrypt(password)
 
         if username == '' or hashed_password == '':
             return {"code": 401, "message": "Wrong username or password"}, 401
