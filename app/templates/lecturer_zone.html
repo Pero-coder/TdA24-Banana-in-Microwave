@@ -11,5 +11,36 @@
     <h2>Příhlášení bylo úspěšné</h2>
 
     <a href="/lecturer-logout">Odhlásit se</a>
+
+    <hr>
+
+    <h2 style="text-decoration: underline;">Dostupné hodiny:</h2>
+    <div id="info"></div>
+
+    <script>
+        window.onload = function() {
+            fetch('/api/reservation-admin/')
+                .then(response => response.json())
+                .then(data => {
+                let output = '';
+                for (let key in data) {
+                    output += `<p>Hodina: ${key}</p>`;
+                    output += `<ul>`;
+                    if (data[key].client_email) {
+                    output += `<li>Email klienta: ${data[key].client_email}</li>`;
+                    }
+                    if (data[key].client_phone) {
+                    output += `<li>Telefon klienta: ${data[key].client_phone}</li>`;
+                    }
+                    output += `<li>Rezervováno: ${data[key].reserved ? 'Ano' : 'Ne'}</li>`;
+                    output += `</ul>`;
+                    output += `<br>`;
+                }
+                document.getElementById('info').innerHTML = output;
+                })
+                .catch(error => console.error('Error:', error));
+            };
+        </script>
+
 </body>
 </html>
