@@ -34,8 +34,19 @@
                     <script>
                         function reserve() {        
                             let hour = prompt("Zadejte hodinu:");
+                            if (hour == '' || hour == null){
+                                return
+                            }
+
                             let phone = prompt("Zadejte telefon:");
+                            if (phone == '' || phone == null){
+                                return
+                            }
+
                             let email = prompt("Zadejte email:");
+                            if (email == '' || email == null){
+                                return
+                            }
                         
                             let data = {
                                 phone: phone,
