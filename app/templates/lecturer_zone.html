@@ -8,7 +8,6 @@
 </head>
 <body>
     <h1>Vítej v lektorské zóně</h1>
-    <h2>Příhlášení bylo úspěšné</h2>
 
     <a href="/lecturer-logout">Odhlásit se</a>
 
@@ -24,7 +23,7 @@
                 .then(data => {
                 let output = '';
                 for (let key in data) {
-                    output += `<p>Hodina: ${key}</p>`;
+                    output += `<p>Hodina: ${key}:00</p>`;
                     output += `<ul>`;
                     if (data[key].client_email) {
                     output += `<li>Email klienta: ${data[key].client_email}</li>`;
