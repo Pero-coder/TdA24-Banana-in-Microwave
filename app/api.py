@@ -318,7 +318,7 @@ def reservation_system_admin():
     if not bool(session.get("logged_in")):
         return redirect("/lecturer-login")
 
-    lecturer_uuid = session.get("uuid")
+    lecturer_uuid = session.get("lecturer_uuid")
 
     if lecturer_uuid is None:
         return {"code": 404, "message": "User not found"}, 404
