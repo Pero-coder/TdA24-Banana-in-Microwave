@@ -42,16 +42,21 @@ def lecturer_login():
         
         username = username.strip()
         password = password.strip()
-        hashed_password = utils.hash_password_bcrypt(password)
+        
+        #hashed_password = utils.hash_password_bcrypt(password)
 
-        if username == '' or hashed_password == '':
+        if username == '' or password == '':
             return {"code": 401, "message": "Wrong username or password"}, 401
 
-        lecturer_credentials = credentials.find_one({"username": {"$eq": username}, "hashed_password": {"$eq": hashed_password}})
+        lecturer_credentials = credentials.find_one({"username": {"$eq": username}})
         
         if not bool(lecturer_credentials):
             return {"code": 401, "message": "Wrong username or password"}, 401
         
+        hashed_password = lecturer_credentials.get("hashed_password")
+
+        if not utils.check_hash_bcrypt(password, hashed_password):
+            return {"code": 401, "message": "Wrong username or password"}, 401
 
         lecturer_uuid = lecturer_credentials.get("_id")
         session["logged_in"] = True

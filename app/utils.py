@@ -2,6 +2,7 @@ from app import db
 from typing import List, Dict
 import re
 import bcrypt
+import pymongo
 
 lecturers = db.lecturers
 tags = db.tags
@@ -50,6 +51,16 @@ def hash_password_bcrypt(password: str) -> str:
     hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
     return hashed.decode('utf-8')
 
+def check_hash_bcrypt(password: str, hashed: str) -> bool:
+    return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
+
 def add_user_credentials_to_db(uuid: str, username: str, password: str) -> bool:
     hashed_password = hash_password_bcrypt(password)
-    credentials.insert_one({"_id": uuid, "username": username, "hashed_password": hashed_password})
+    try:
+        credentials.create_index("username", unique=True)
+        credentials.insert_one({"_id": uuid, "username": username, "hashed_password": hashed_password})
+        return True
+    
+    except pymongo.errors.DuplicateKeyError:
+        print("Username already exists.")
+        return False
