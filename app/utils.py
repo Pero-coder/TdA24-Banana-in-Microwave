@@ -7,6 +7,7 @@ import pymongo
 lecturers = db.lecturers
 tags = db.tags
 credentials = db.credentials
+reservations = db.reservations
 
 def get_all_tags():
     existing_tags: List[Dict] = list()
@@ -63,4 +64,17 @@ def add_user_credentials_to_db(uuid: str, username: str, password: str) -> bool:
     
     except pymongo.errors.DuplicateKeyError:
         print("Username already exists.")
+        return False
+    
+def add_user_to_reservations_db(uuid: str) -> bool:
+
+    try:
+        reserved_hours = dict()
+        reserved_hours["_id"] = uuid
+        reserved_hours["teaching_hours"] = { str(hour): {"reserved": False, "client_email": None, "client_phone": None} for hour in range(8, 21) }
+        reservations.insert_one(reserved_hours)
+        return True
+    
+    except Exception as e:
+        print(e)
         return False
