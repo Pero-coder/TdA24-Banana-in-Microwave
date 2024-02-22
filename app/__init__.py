@@ -11,7 +11,7 @@ client = MongoClient(
     f'mongodb+srv://{os.environ.get("MONGO_USERNAME")}:{os.environ.get("MONGO_PWD")}@cluster0.ebiunpa.mongodb.net/?retryWrites=true&w=majority'
 )
 app = Flask(__name__)
-app.secret_key = secrets.token_hex(16)  # Generate a random secret key
+app.secret_key = secrets.token_hex(32)  # Generate a random secret key
 app.permanent_session_lifetime = timedelta(hours=4)  # Session expires after 4 hours
 db = client.production_database
 
