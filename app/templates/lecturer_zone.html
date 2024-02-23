@@ -141,7 +141,7 @@
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById('hourDropBox').selectedIndex = 0
-                    showMessage(`Rezervace u hodiny ${hour}:00 byla vyresetována.`, "#ADFF2F")
+                    showMessage(`Rezervace u hodiny ${hour}:00 byla vyresetována.`, "#FFA07A")
                     loadHours()
                 })
                 .catch((error) => console.error('Error:', error));
