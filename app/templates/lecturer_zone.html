@@ -43,6 +43,11 @@
                 location.reload();
             }
 
+            function showMessage(message, color){
+                document.getElementById('message_box').innerHTML = message;
+                document.getElementById('message_box').style.backgroundColor = color
+            }
+
             function loadHours() {
                 fetch('/api/reservation-admin/')
                 .then(response => {
@@ -74,60 +79,79 @@
             }
 
             function enableHour() {
+                if (document.getElementById('hourDropBox').selectedIndex == 0){
+                    alert("Vyberte validní čas!")
+                    return
+                }
                 let hour = document.getElementById('hourDropBox').value;
+
                 fetch('/api/reservation-admin/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({hour: hour}),
+                    body: JSON.stringify({"hour": hour}),
                 })
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById('hourDropBox').selectedIndex = 0
-                    refreshPage()
-                    //loadHours()
+                    showMessage(`Hodina ${hour}:00 byla přidána do výběru.`, "#ADFF2F")
+                    loadHours()
                 })
                 .catch((error) => console.error('Error:', error));
             }
 
             function disableHour() {
+                if (document.getElementById('hourDropBox').selectedIndex == 0){
+                    alert("Vyberte validní čas!")
+                    return
+                }
+
                 let hour = document.getElementById('hourDropBox').value;
                 fetch('/api/reservation-admin/', {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({hour: hour}),
+                    body: JSON.stringify({"hour": hour}),
                 })
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById('hourDropBox').selectedIndex = 0
-                    refreshPage()
-                    //loadHours()
+                    showMessage(`Hodina ${hour}:00 byla smazána z výběru.`, "#F08080")
+                    loadHours()
                 })
                 .catch((error) => console.error('Error:', error));
             }
 
             function resetHour() {
+                if (document.getElementById('hourDropBox').selectedIndex == 0){
+                    alert("Vyberte validní čas!")
+                    return
+                }
+
                 let hour = document.getElementById('hourDropBox').value;
                 fetch('/api/reservation-admin/', {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({hour: hour}),
+                    body: JSON.stringify({"hour": hour}),
                 })
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById('hourDropBox').selectedIndex = 0
-                    refreshPage()
-                    //loadHours()
+                    showMessage(`Rezervace u hodiny ${hour}:00 byla vyresetována.`, "#ADFF2F")
+                    loadHours()
                 })
                 .catch((error) => console.error('Error:', error));
             }
         </script>
     </div>
+
+    <br>
+
+    <div style="padding: 5px;" id="message_box"></div>
 
     <br>
 
@@ -137,7 +161,7 @@
         window.onload = function() {
             loadHours()
         };
-        </script>
+    </script>
 
 </body>
 </html>
