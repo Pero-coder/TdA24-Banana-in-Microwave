@@ -19,8 +19,10 @@ def lecturer_empty():
 def lecturer_zone():
     if not bool(session.get("logged_in")):
         return redirect("/lecturer-login")
+    
+    lecturer_uuid = session.get("lecturer_uuid")
 
-    return render_template("lecturer_zone.html")
+    return render_template("lecturer_zone.html", lecturer_uuid=lecturer_uuid)
 
 
 @app.route("/lecturer-login", methods=["GET", "POST"])
