@@ -18,37 +18,113 @@
     <h2 style="text-decoration: underline;">Dostupné hodiny:</h2>
 
     <div>
-        <select id="hour">
+        <select id="hourDropBox">
             <option value="">Vyberte hodinu</option>
-            <option value="8">8</option>
-            <option value="9">9</option>
-            <option value="10">10</option>
-            <option value="11">11</option>
-            <option value="12">12</option>
-            <option value="13">13</option>
-            <option value="14">14</option>
-            <option value="15">15</option>
-            <option value="16">16</option>
-            <option value="17">17</option>
-            <option value="18">18</option>
-            <option value="19">19</option>
-            <option value="20">20</option>
+            <option value="8">8:00</option>
+            <option value="9">9:00</option>
+            <option value="10">10:00</option>
+            <option value="11">11:00</option>
+            <option value="12">12:00</option>
+            <option value="13">13:00</option>
+            <option value="14">14:00</option>
+            <option value="15">15:00</option>
+            <option value="16">16:00</option>
+            <option value="17">17:00</option>
+            <option value="18">18:00</option>
+            <option value="19">19:00</option>
+            <option value="20">20:00</option>
         </select>
-        <button onclick="enableHour()">Přidat</button>
-        <button onclick="disableHour()">Odebrat</button>
+        <button onclick="enableHour()">Povolit</button>
+        <button onclick="disableHour()">Zakázat</button>
         <button onclick="resetHour()">Smazat rezervaci</button>
         
         <script>
+            function refreshPage() {
+                location.reload();
+            }
+
+            function loadHours() {
+                fetch('/api/reservation-admin/')
+                .then(response => {
+                    if (response.status === 200) {
+                        return response.json();
+                    } else {
+                        document.getElementById('info').innerHTML = '[Chyba] Nepovedlo se načíst dostupné hodiny!';
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                })
+                .then(data => {
+                    let output = '';
+                    for (let key in data) {
+                        output += `<p>Hodina: ${key}:00</p>`;
+                        output += `<ul>`;
+                        if (data[key].client_email) {
+                        output += `<li>Email klienta: ${data[key].client_email}</li>`;
+                        }
+                        if (data[key].client_phone) {
+                        output += `<li>Telefon klienta: ${data[key].client_phone}</li>`;
+                        }
+                        output += `<li>Rezervováno: ${data[key].reserved ? 'Ano' : 'Ne'}</li>`;
+                        output += `</ul>`;
+                        output += `<br>`;
+                    }
+                    document.getElementById('info').innerHTML = output;
+                })
+                .catch(error => console.error('Error:', error));
+            }
+
             function enableHour() {
-                // Your code here...
+                let hour = document.getElementById('hourDropBox').value;
+                fetch('/api/reservation-admin/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({hour: hour}),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('hourDropBox').selectedIndex = 0
+                    refreshPage()
+                    //loadHours()
+                })
+                .catch((error) => console.error('Error:', error));
             }
-            
+
             function disableHour() {
-                // Your code here...
+                let hour = document.getElementById('hourDropBox').value;
+                fetch('/api/reservation-admin/', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({hour: hour}),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('hourDropBox').selectedIndex = 0
+                    refreshPage()
+                    //loadHours()
+                })
+                .catch((error) => console.error('Error:', error));
             }
-            
+
             function resetHour() {
-                // Your code here...
+                let hour = document.getElementById('hourDropBox').value;
+                fetch('/api/reservation-admin/', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({hour: hour}),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('hourDropBox').selectedIndex = 0
+                    refreshPage()
+                    //loadHours()
+                })
+                .catch((error) => console.error('Error:', error));
             }
         </script>
     </div>
@@ -59,33 +135,7 @@
 
     <script>
         window.onload = function() {
-            fetch('/api/reservation-admin/')
-            .then(response => {
-                if (response.status === 200) {
-                    return response.json();
-                } else {
-                    document.getElementById('info').innerHTML = '[Chyba] Nepovedlo se načíst dostupné hodiny!';
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-            })
-            .then(data => {
-                let output = '';
-                for (let key in data) {
-                    output += `<p>Hodina: ${key}:00</p>`;
-                    output += `<ul>`;
-                    if (data[key].client_email) {
-                    output += `<li>Email klienta: ${data[key].client_email}</li>`;
-                    }
-                    if (data[key].client_phone) {
-                    output += `<li>Telefon klienta: ${data[key].client_phone}</li>`;
-                    }
-                    output += `<li>Rezervováno: ${data[key].reserved ? 'Ano' : 'Ne'}</li>`;
-                    output += `</ul>`;
-                    output += `<br>`;
-                }
-                document.getElementById('info').innerHTML = output;
-            })
-            .catch(error => console.error('Error:', error));
+            loadHours()
         };
         </script>
 
