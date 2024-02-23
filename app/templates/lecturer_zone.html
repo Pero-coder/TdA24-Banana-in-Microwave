@@ -21,8 +21,15 @@
     <script>
         window.onload = function() {
             fetch('/api/reservation-admin/')
-                .then(response => response.json())
-                .then(data => {
+            .then(response => {
+                if (response.status === 200) {
+                    return response.json();
+                } else {
+                    document.getElementById('info').innerHTML = '[Chyba] Nepovedlo se načíst dostupné hodiny!';
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+            })
+            .then(data => {
                 let output = '';
                 for (let key in data) {
                     output += `<p>Hodina: ${key}:00</p>`;
@@ -38,9 +45,9 @@
                     output += `<br>`;
                 }
                 document.getElementById('info').innerHTML = output;
-                })
-                .catch(error => console.error('Error:', error));
-            };
+            })
+            .catch(error => console.error('Error:', error));
+        };
         </script>
 
 </body>
