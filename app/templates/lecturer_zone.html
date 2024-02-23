@@ -79,11 +79,11 @@
             }
 
             function enableHour() {
-                if (document.getElementById('hourDropBox').selectedIndex == 0){
+                let hour = document.getElementById('hourDropBox').value;
+                if (hour == ""){
                     alert("Vyberte validní čas!")
                     return
                 }
-                let hour = document.getElementById('hourDropBox').value;
 
                 fetch('/api/reservation-admin/', {
                     method: 'POST',
@@ -102,12 +102,12 @@
             }
 
             function disableHour() {
-                if (document.getElementById('hourDropBox').selectedIndex == 0){
+                let hour = document.getElementById('hourDropBox').value;
+                if (hour == ""){
                     alert("Vyberte validní čas!")
                     return
                 }
 
-                let hour = document.getElementById('hourDropBox').value;
                 fetch('/api/reservation-admin/', {
                     method: 'DELETE',
                     headers: {
@@ -125,12 +125,12 @@
             }
 
             function resetHour() {
-                if (document.getElementById('hourDropBox').selectedIndex == 0){
+                let hour = document.getElementById('hourDropBox').value;
+                if (hour == ""){
                     alert("Vyberte validní čas!")
                     return
                 }
 
-                let hour = document.getElementById('hourDropBox').value;
                 fetch('/api/reservation-admin/', {
                     method: 'PUT',
                     headers: {
