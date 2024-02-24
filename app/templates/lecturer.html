@@ -28,53 +28,9 @@
                     
                     
                     <div style="text-align: center; margin-top: 15%;">
-                        <button onclick="reserve()" style="font-size: 18px; padding: 7px;">Zarezervovat</button>
+                        <button onclick="openReserveDialog()" style="font-size: 18px; padding: 7px;">Zarezervovat</button>
                     </div>
 
-                    <script>
-                        function reserve() {        
-                            let hour = prompt("Zadejte hodinu:");
-                            if (hour == '' || hour == null){
-                                return
-                            }
-
-                            let phone = prompt("Zadejte telefon:");
-                            if (phone == '' || phone == null){
-                                return
-                            }
-
-                            let email = prompt("Zadejte email:");
-                            if (email == '' || email == null){
-                                return
-                            }
-                        
-                            let data = {
-                                phone: phone,
-                                email: email,
-                                hour: hour
-                            };
-                        
-                            fetch('/api/reservation/{{lecturer_uuid}}', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify(data),
-                            })
-                            .then(response => {
-                                if (response.status === 200) {
-                                    alert('V pořádku');
-                                } else {
-                                    return response.json().then(data => {
-                                        alert(JSON.stringify(data["message"]));
-                                    });
-                                }
-                            })
-                            .catch((error) => {
-                                alert('Error: ' + error);
-                            });
-                        }
-                        </script>
                 </div>
 
             </div>
@@ -99,5 +55,132 @@
             </div>
         </div>
     </div>
+
+    <dialog id="reserveDialogModal">
+        <form id="reserveForm">
+            <h2>Údaje k rezervaci:</h2>
+            <p>
+                <label for="hour">Hodina:</label>
+                <select id="hourDropBox">
+                    <option value="">Vyberte hodinu</option>
+                    <option value="8">8:00</option>
+                    <option value="9">9:00</option>
+                    <option value="10">10:00</option>
+                    <option value="11">11:00</option>
+                    <option value="12">12:00</option>
+                    <option value="13">13:00</option>
+                    <option value="14">14:00</option>
+                    <option value="15">15:00</option>
+                    <option value="16">16:00</option>
+                    <option value="17">17:00</option>
+                    <option value="18">18:00</option>
+                    <option value="19">19:00</option>
+                    <option value="20">20:00</option>
+                </select>
+            </p>
+    
+            <p>
+                <label for="email">Email:</label>
+                <input type="email" name="email" id="email" required>
+            </p>
+    
+            <p>
+                <label for="phone">Telefonní číslo:</label>
+                <input type="tel" name="phone" id="phone" required>
+            </p>
+
+            <br>
+    
+            <div>
+                <button type="submit" id="submitReserveForm">Odeslat</button>
+                <button formmethod="dialog" type="submit" id="closeModal">Zavřít</button>
+            </div>
+        </form>
+    </dialog>
+
+    <script>
+        var dialog = document.getElementById('reserveDialogModal');
+
+        var form = document.getElementById('reserveForm');
+
+        var closeButton = document.getElementById('closeModal');
+        var submitButton = document.getElementById('submitReserveForm');
+
+
+        function openReserveDialog(event) {
+            if (event) {
+                event.preventDefault();
+            }
+            form.reset()
+            dialog.showModal();
+        }
+
+        function closeReserveDialog(event) {
+            if (event) {
+                event.preventDefault();
+            }
+            form.reset()
+            dialog.close();
+        }
+
+
+        function submitForm(e) {
+            e.preventDefault();
+
+            var hour = document.getElementById('hourDropBox').value;
+            var email = document.getElementById('email').value;
+            var phone = document.getElementById('phone').value;
+
+            if (hour == '' || hour == null){
+                alert("Musíte vybrat hodinu!")
+                return
+            }
+
+            
+            if (email == '' || email == null){
+                alert("Musíte zadat email!")
+                return
+            }
+            
+            if (phone == '' || phone == null){
+                alert("Musíte zadat telefonní číslo!")
+                return
+            }
+        
+            let data = {
+                phone: phone,
+                email: email,
+                hour: hour
+            };
+        
+            fetch('/api/reservation/{{lecturer_uuid}}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert("Rezervace proběhla v pořádku")
+                    closeReserveDialog();
+                    return null;
+                }
+                return response.json();
+            })
+            .then(data => {
+                if(data !== null){
+                    alert(JSON.stringify(data["message"]));
+                }
+            })
+            .catch((error) => {
+                alert('Error: ' + error);
+            });
+        }
+
+        // Add event listeners
+        closeButton.addEventListener('click', closeReserveDialog);
+        submitButton.addEventListener('click', submitForm);
+    </script>
 </body>
 </html>
