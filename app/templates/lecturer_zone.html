@@ -7,11 +7,13 @@
     <title>Lektorská zóna</title>
 </head>
 <body>
-    <h1>Vítejte v lektorské zóně (<span id="lecturer_fullname"></span>)</h1>
+    <h1>Vítejte v lektorské zóně ({{lecturer_firstname}} {{lecturer_lastname}})</h1>
 
     <a href="/">Hlavní stránka</a>
     <label>|</label>
     <a href="/lecturer-logout">Odhlásit se</a>
+    <label>|</label>
+    <a href="javascript:void(0)" onclick="alert('Změna hesla')">Změnit heslo</a>
 
     <hr>
 
@@ -41,24 +43,6 @@
         <script>
             function refreshPage() {
                 location.reload();
-            }
-
-            function loadLecturerInfo(){
-                fetch("/api/lecturers/{{lecturer_uuid}}", {
-                    method: 'GET',
-                })
-                .then(response => {
-                    if (response.status === 200) {
-                        return response.json();
-                    } else {
-                        document.getElementById('info').innerHTML = '[Chyba] Nepovedlo se načíst dostupné hodiny!';
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                })
-                .then(data => {
-                    document.getElementById('lecturer_fullname').innerHTML = data["first_name"] + " " + data["last_name"];
-                })
-                .catch((error) => console.error('Error:', error));
             }
 
             function showMessage(message, color){
@@ -198,7 +182,6 @@
 
     <script>
         window.onload = function() {
-            loadLecturerInfo()
             loadHours()
         };
     </script>

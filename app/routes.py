@@ -21,8 +21,16 @@ def lecturer_zone():
         return redirect("/lecturer-login")
     
     lecturer_uuid = session.get("lecturer_uuid")
+    lecturer = utils.get_specific_lecturer(lecturer_uuid)
+    if lecturer[1] == 404:
+        return lecturer
+    
+    lecturer_json: dict = lecturer[0]
+    
+    firstname = lecturer_json.get("first_name")
+    lastname = lecturer_json.get("last_name")
 
-    return render_template("lecturer_zone.html", lecturer_uuid=lecturer_uuid)
+    return render_template("lecturer_zone.html", lecturer_firstname=firstname, lecturer_lastname=lastname)
 
 
 @app.route("/lecturer-login", methods=["GET", "POST"])
