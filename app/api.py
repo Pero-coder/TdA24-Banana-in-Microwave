@@ -65,10 +65,14 @@ def api_lecturers():
             new_lecturer_json["_id"] = str(uuid.uuid4())
             lecturers.insert_one(new_lecturer_json)
 
-            reserved_hours = dict()
-            reserved_hours["_id"] = new_lecturer_json["_id"]
-            reserved_hours["teaching_hours"] = { str(hour): {"reserved": False, "client_email": None, "client_phone": None} for hour in range(8, 21) }
-            reservations.insert_one(reserved_hours)
+            username = new_lecturer_json.get("username", "").strip()
+            password = new_lecturer_json.get("password", "").strip()
+
+            if username == '' or password == '':
+                return {"code": 400, "message": "Invalid username or password"}, 400
+
+            utils.add_user_to_reservations_db(new_lecturer_json["_id"])
+            utils.add_user_credentials_to_db(new_lecturer_json["_id"], username, password)
 
             return get_specific_lecturer(new_lecturer_json["_id"])
 
