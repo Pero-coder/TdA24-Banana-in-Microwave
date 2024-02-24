@@ -174,13 +174,19 @@ def update_lecturer(lecturer_uuid):
             # check for credentials change
             new_username = updated_lecturer_json.get("username")
             if new_username is not None:
-                utils.change_user_username_in_db(lecturer_uuid, new_username)
                 updated_lecturer_json.pop("username")
+                success = utils.change_user_username_in_db(lecturer_uuid, new_username)
+                
+                if not success:
+                    return {"code": 400, "message": "Username already exists in DB!"}, 400
 
             new_password = updated_lecturer_json.get("password")
             if new_password is not None:
-                utils.change_user_password_in_db(lecturer_uuid, new_password)
                 updated_lecturer_json.pop("password")
+                success = utils.change_user_password_in_db(lecturer_uuid, new_password)
+
+                if not success:
+                    return {"code": 400, "message": "Failed to change a password!"}, 400
 
 
             # Escape unsafe HTML
