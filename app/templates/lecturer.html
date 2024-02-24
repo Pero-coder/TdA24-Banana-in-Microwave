@@ -25,7 +25,58 @@
                             <p class="email">{{email}}</p>
                         </a>
                     {% endfor %}
+                    
+                    
+                    <div style="text-align: center; margin-top: 15%;">
+                        <button onclick="reserve()" style="font-size: 18px; padding: 7px;">Zarezervovat</button>
+                    </div>
+
+                    <script>
+                        function reserve() {        
+                            let hour = prompt("Zadejte hodinu:");
+                            if (hour == '' || hour == null){
+                                return
+                            }
+
+                            let phone = prompt("Zadejte telefon:");
+                            if (phone == '' || phone == null){
+                                return
+                            }
+
+                            let email = prompt("Zadejte email:");
+                            if (email == '' || email == null){
+                                return
+                            }
+                        
+                            let data = {
+                                phone: phone,
+                                email: email,
+                                hour: hour
+                            };
+                        
+                            fetch('/api/reservation/{{lecturer_uuid}}', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify(data),
+                            })
+                            .then(response => {
+                                if (response.status === 200) {
+                                    alert('V pořádku');
+                                } else {
+                                    return response.json().then(data => {
+                                        alert(JSON.stringify(data["message"]));
+                                    });
+                                }
+                            })
+                            .catch((error) => {
+                                alert('Error: ' + error);
+                            });
+                        }
+                        </script>
                 </div>
+
             </div>
             <div class="content">
                 <h1>

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{{url_for('static', filename='favicon.svg')}}" type="image/svg+xml">
+    <title>Lektorská zóna</title>
+</head>
+<body>
+    <h1>Vítejte v lektorské zóně (<span id="lecturer_fullname"></span>)</h1>
+
+    <a href="/">Hlavní stránka</a>
+    <label>|</label>
+    <a href="/lecturer-logout">Odhlásit se</a>
+
+    <hr>
+
+    <h2 style="text-decoration: underline;">Dostupné hodiny:</h2>
+
+    <div>
+        <select id="hourDropBox">
+            <option value="">Vyberte hodinu</option>
+            <option value="8">8:00</option>
+            <option value="9">9:00</option>
+            <option value="10">10:00</option>
+            <option value="11">11:00</option>
+            <option value="12">12:00</option>
+            <option value="13">13:00</option>
+            <option value="14">14:00</option>
+            <option value="15">15:00</option>
+            <option value="16">16:00</option>
+            <option value="17">17:00</option>
+            <option value="18">18:00</option>
+            <option value="19">19:00</option>
+            <option value="20">20:00</option>
+        </select>
+        <button onclick="enableHour()">Povolit</button>
+        <button onclick="disableHour()">Zakázat</button>
+        <button onclick="resetHour()">Smazat rezervaci</button>
+        
+        <script>
+            function refreshPage() {
+                location.reload();
+            }
+
+            function loadLecturerInfo(){
+                fetch("/api/lecturers/{{lecturer_uuid}}", {
+                    method: 'GET',
+                })
+                .then(response => {
+                    if (response.status === 200) {
+                        return response.json();
+                    } else {
+                        document.getElementById('info').innerHTML = '[Chyba] Nepovedlo se načíst dostupné hodiny!';
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                })
+                .then(data => {
+                    document.getElementById('lecturer_fullname').innerHTML = data["first_name"] + " " + data["last_name"];
+                })
+                .catch((error) => console.error('Error:', error));
+            }
+
+            function showMessage(message, color){
+                document.getElementById('message_box').innerHTML = message;
+                document.getElementById('message_box').style.backgroundColor = color
+            }
+
+            function loadHours() {
+                fetch('/api/reservation-admin/')
+                .then(response => {
+                    if (response.status === 200) {
+                        return response.json();
+                    } else {
+                        document.getElementById('info').innerHTML = '[Chyba] Nepovedlo se načíst dostupné hodiny!';
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                })
+                .then(data => {
+                    let output = '';
+                    for (let key in data) {
+                        output += `<p>Hodina: ${key}:00</p>`;
+                        output += `<ul>`;
+                        if (data[key].client_email) {
+                        output += `<li>Email klienta: ${data[key].client_email}</li>`;
+                        }
+                        if (data[key].client_phone) {
+                        output += `<li>Telefon klienta: ${data[key].client_phone}</li>`;
+                        }
+                        output += `<li>Rezervováno: ${data[key].reserved ? 'Ano' : 'Ne'}</li>`;
+                        output += `</ul>`;
+                        output += `<br>`;
+                    }
+                    document.getElementById('info').innerHTML = output;
+                })
+                .catch(error => console.error('Error:', error));
+            }
+
+            function enableHour() {
+                let hour = document.getElementById('hourDropBox').value;
+                if (hour === ""){
+                    alert("Vyberte validní čas!")
+                    return
+                }
+
+                fetch('/api/reservation-admin/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({"hour": hour}),
+                })
+                .then(response => {
+                    if (response.status === 200) {
+                        return response.json();
+                    } else {
+                        showMessage("[Chyba] Nepovedlo se přidat hodinu do výběru!", "#F08080");
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                })
+                .then(data => {
+                    document.getElementById('hourDropBox').selectedIndex = 0
+                    showMessage(`Hodina ${hour}:00 byla přidána do výběru.`, "#ADFF2F")
+                    loadHours()
+                })
+                .catch((error) => console.error('Error:', error));
+            }
+
+            function disableHour() {
+                let hour = document.getElementById('hourDropBox').value;
+                if (hour === ""){
+                    alert("Vyberte validní čas!")
+                    return
+                }
+
+                fetch('/api/reservation-admin/', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({"hour": hour}),
+                })
+                .then(response => {
+                    if (response.status === 200) {
+                        return response.json();
+                    } else {
+                        showMessage("[Chyba] Nepovedlo se smazat hodinu z výběru!", "#F08080");
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                })
+                .then(data => {
+                    document.getElementById('hourDropBox').selectedIndex = 0
+                    showMessage(`Hodina ${hour}:00 byla smazána z výběru.`, "#F08080")
+                    loadHours()
+                })
+                .catch((error) => console.error('Error:', error));
+            }
+
+            function resetHour() {
+                let hour = document.getElementById('hourDropBox').value;
+                if (hour === ""){
+                    alert("Vyberte validní čas!")
+                    return
+                }
+
+                fetch('/api/reservation-admin/', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({"hour": hour}),
+                })
+                .then(response => {
+                    if (response.status === 200) {
+                        return response.json();
+                    } else {
+                        showMessage(`[Chyba] Nepovedlo se resetovat rezervaci!`, "#F08080")
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                })
+                .then(data => {
+                    document.getElementById('hourDropBox').selectedIndex = 0
+                    showMessage(`Rezervace u hodiny ${hour}:00 byla vyresetována.`, "#FFA07A")
+                    loadHours()
+                })
+                .catch((error) => console.error('Error:', error));
+            }
+        </script>
+    </div>
+
+    <br>
+
+    <div style="padding: 5px;" id="message_box"></div>
+
+    <br>
+
+    <div id="info"></div>
+
+    <script>
+        window.onload = function() {
+            loadLecturerInfo()
+            loadHours()
+        };
+    </script>
+
+</body>
+</html>

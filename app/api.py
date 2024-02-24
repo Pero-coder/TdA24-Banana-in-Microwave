@@ -1,5 +1,5 @@
-from app import app, db
-from flask import render_template, request
+from app import app, db, utils
+from flask import render_template, request, session, redirect
 
 from app.models import NewLecturer, EditLecturer, Tag
 from pydantic import ValidationError
@@ -13,7 +13,9 @@ DEFAULT_RESULTS_COUNT = 20
 
 
 lecturers = db.lecturers
+reservations = db.reservations
 tags = db.tags
+credentials = db.credentials
 
 ALLOWED_TAGS = ['b', 'i', 'u', 'em', 'strong', 'a']
 
@@ -63,6 +65,15 @@ def api_lecturers():
             new_lecturer_json["_id"] = str(uuid.uuid4())
             lecturers.insert_one(new_lecturer_json)
 
+            username = new_lecturer_json.get("username", "").strip()
+            password = new_lecturer_json.get("password", "").strip()
+
+            if username == '' or password == '':
+                return {"code": 400, "message": "Invalid username or password"}, 400
+
+            utils.add_user_to_reservations_db(new_lecturer_json["_id"])
+            utils.add_user_credentials_to_db(new_lecturer_json["_id"], username, password)
+
             return get_specific_lecturer(new_lecturer_json["_id"])
 
         except ValidationError as e:
@@ -77,9 +88,9 @@ def api_lecturers():
     return json.loads(json_util.dumps(found_lecturers)), 200
 
 
-@app.route("/api/lecturers/<string:uuid>", methods=["GET"])
-def get_specific_lecturer(uuid: str):
-    found_lecturer = lecturers.find_one({"_id": {"$eq": uuid}})
+@app.route("/api/lecturers/<string:lecturer_uuid>", methods=["GET"])
+def get_specific_lecturer(lecturer_uuid: str):
+    found_lecturer = lecturers.find_one({"_id": {"$eq": lecturer_uuid}})
 
     if found_lecturer is None:
         return {"code": 404, "message": "User not found"}, 404
@@ -88,9 +99,9 @@ def get_specific_lecturer(uuid: str):
         return json.loads(json_util.dumps(found_lecturer)), 200
 
 
-@app.route("/api/lecturers/<string:uuid>", methods=["DELETE"])
-def delete_lecturer(uuid):
-    deleted = bool(lecturers.delete_one({"_id": {"$eq": uuid}}).deleted_count)
+@app.route("/api/lecturers/<string:lecturer_uuid>", methods=["DELETE"])
+def delete_lecturer(lecturer_uuid):
+    deleted = bool(lecturers.delete_one({"_id": {"$eq": lecturer_uuid}}).deleted_count)
 
     if deleted:
         return '', 204
@@ -218,3 +229,217 @@ def filter_lecturers():
         start_index=start_index, 
         total_count=total_count, 
         query_string=request.query_string.decode("utf-8"))
+
+
+# reservation API
+@app.route("/api/reservation/<string:lecturer_uuid>", methods=["GET", "POST", "DELETE"])
+def reservation_system(lecturer_uuid):
+
+    uuid_exists = bool(reservations.find_one({"_id": {"$eq": lecturer_uuid}}))
+    if not uuid_exists:
+        return {"code": 404, "message": "User not found"}, 404
+
+    if request.method == 'GET':
+        # get lecturer's info only about hours
+
+        found_reservations = reservations.find_one({"_id": {"$eq": lecturer_uuid}})
+        
+        try:
+            teaching_hours = found_reservations.get("teaching_hours")
+            only_hours_info = {k: v.get('reserved') for k, v in teaching_hours.items()}
+            return only_hours_info, 200
+        
+        except:
+            return {"code": 404, "message": "User not found"}, 404
+
+
+    elif request.method == 'POST':
+        # book a time (client)
+        request_json: Dict = request.get_json() # {"hour": "8", "email": "test@example.com", "phone": "+420123456789"}
+
+        # time validation
+        hour = request_json.get("hour")
+        if hour is not None:
+            try:
+                converted_time = int(hour)
+                if not (converted_time >= 8 and converted_time <= 20):
+                    return {"code": 400, "message": "Time not in a range"}, 400
+                
+            except:
+                return {"code": 400, "message": "Invalid data"}, 400
+        else:
+            return {"code": 400, "message": "Invalid data"}, 400
+        
+
+        lecturer_hours_info = reservations.find_one({"_id": {"$eq": lecturer_uuid}})["teaching_hours"]
+        hour_info = lecturer_hours_info.get(str(converted_time))
+
+        if hour_info is None:
+            return {"code": 400, "message": "Time not available"}, 400
+        
+        already_reserved = bool(hour_info.get("reserved"))
+
+        if already_reserved:
+            return {"code": 400, "message": "Time already taken"}, 400
+        
+
+        # email validation
+        email = request_json.get("email")
+        if email is None:
+            return {"code": 400, "message": "Invalid data"}, 400
+        else:
+            email = str(email).strip()
+        
+        if not utils.is_email_valid(email):
+            return {"code": 400, "message": "Invalid email"}, 400
+
+        # phone number validation
+        phone = request_json.get("phone")
+        if phone is None:
+            return {"code": 400, "message": "Invalid data"}, 400
+        else:
+            phone = str(phone).replace(' ', '')
+
+        if not utils.is_phone_number_valid(phone):
+            return {"code": 400, "message": "Invalid number"}, 400
+
+        reservations.update_one({"_id": lecturer_uuid, f"teaching_hours.{str(converted_time)}": {"$exists": True}}, {"$set": {
+            f"teaching_hours.{str(converted_time)}.reserved": True,
+            f"teaching_hours.{str(converted_time)}.client_email": email,
+            f"teaching_hours.{str(converted_time)}.client_phone": phone}})
+
+
+        return {"code": 200, "message": "Success"}, 200
+
+    return {"code": 405, "message": "Method not allowed"}, 405
+    
+
+# reservation API for lecturers
+@app.route("/api/reservation-admin/", methods=["GET", "POST", "DELETE", "PUT"])
+def reservation_system_admin():
+
+    # Check login status
+    if not bool(session.get("logged_in")):
+        return redirect("/lecturer-login")
+
+    lecturer_uuid = session.get("lecturer_uuid")
+
+    if lecturer_uuid is None:
+        return {"code": 404, "message": "User not found"}, 404
+
+    uuid_exists = bool(reservations.find_one({"_id": {"$eq": lecturer_uuid}}))
+    if not uuid_exists:
+        return {"code": 404, "message": "User not found"}, 404
+
+
+    if request.method == 'GET':
+        # get full info about lecturer's reserved hours
+
+        found_reservations = reservations.find_one({"_id": {"$eq": lecturer_uuid}})
+        
+        try:
+            teaching_hours = found_reservations.get("teaching_hours")
+            return teaching_hours, 200
+        
+        except:
+            return {"code": 404, "message": "User not found"}, 404
+
+
+    elif request.method == 'POST':
+        # add time to available times
+
+        request_json: Dict = request.get_json() # {"hour": "8"}
+
+        # time validation
+        hour = request_json.get("hour")
+        if hour is not None:
+            try:
+                converted_time = int(hour)
+                if not (converted_time >= 8 and converted_time <= 20):
+                    return {"code": 400, "message": "Time not in a range"}, 400
+                
+            except:
+                return {"code": 400, "message": "Invalid data"}, 400
+        else:
+            return {"code": 400, "message": "Invalid data"}, 400
+
+
+        lecturer_hours_info = reservations.find_one({"_id": {"$eq": lecturer_uuid}})["teaching_hours"]
+        hour_exists = bool(lecturer_hours_info.get(str(converted_time)))
+
+        if hour_exists:
+            return {"code": 200, "message": "Success - already exists"}, 200
+        
+        reservations.update_one({"_id": lecturer_uuid, f"teaching_hours.{str(converted_time)}": {"$exists": False}}, {"$set": {
+                f"teaching_hours.{str(converted_time)}.reserved": False,
+                f"teaching_hours.{str(converted_time)}.client_email": None,
+                f"teaching_hours.{str(converted_time)}.client_phone": None
+            }}
+        )
+
+        return {"code": 200, "message": "Success"}, 200
+
+    
+    elif request.method == 'DELETE':
+        # remove time from available times
+        
+        request_json: Dict = request.get_json() # {"hour": "8"}
+
+        # time validation
+        hour = request_json.get("hour")
+        if hour is not None:
+            try:
+                converted_time = int(hour)
+                if not (converted_time >= 8 and converted_time <= 20):
+                    return {"code": 400, "message": "Time not in a range"}, 400
+                
+            except:
+                return {"code": 400, "message": "Invalid data"}, 400
+        else:
+            return {"code": 400, "message": "Invalid data"}, 400
+
+
+        lecturer_hours_info = reservations.find_one({"_id": {"$eq": lecturer_uuid}})["teaching_hours"]
+        hour_exists = bool(lecturer_hours_info.get(str(converted_time)))
+
+        if not hour_exists:
+            return {"code": 200, "message": "Success - already deleted"}, 200
+        
+        # delete
+        reservations.update_one(
+            {"_id": {"$eq": lecturer_uuid}},
+            {"$unset": {f"teaching_hours.{converted_time}": 1}}
+        )
+
+        return {"code": 200, "message": "Success"}, 200
+    
+
+    elif request.method == 'PUT':
+        # reset any reserved time
+
+        request_json: Dict = request.get_json() # {"hour": "8"}
+
+        # time validation
+        hour = request_json.get("hour")
+        if hour is not None:
+            try:
+                converted_time = int(hour)
+                if not (converted_time >= 8 and converted_time <= 20):
+                    return {"code": 400, "message": "Time not in a range"}, 400
+                
+            except:
+                return {"code": 400, "message": "Invalid data"}, 400
+        else:
+            return {"code": 400, "message": "Invalid data"}, 400
+
+        reservations.update_one({"_id": lecturer_uuid, f"teaching_hours.{str(converted_time)}": {"$exists": True}}, {"$set": {
+                f"teaching_hours.{str(converted_time)}.reserved": False,
+                f"teaching_hours.{str(converted_time)}.client_email": None,
+                f"teaching_hours.{str(converted_time)}.client_phone": None
+            }}
+        )
+
+        return {"code": 200, "message": "Success"}, 200
+
+
+    return {"code": 405, "message": "Method not allowed"}, 405

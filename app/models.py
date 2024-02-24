@@ -25,6 +25,9 @@ class NewLecturer(BaseModel):
     price_per_hour: Optional[int] = Field(None, ge=0)
     contact: Contact
 
+    username: str
+    password: str
+
     class Config:
         extra = "ignore"
 
