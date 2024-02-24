@@ -78,7 +78,6 @@ def change_user_password_in_db(uuid: str, new_password: str) -> bool:
         return False
     
 def change_user_username_in_db(uuid: str, new_username: str) -> bool:
-
     try:
         username_exists = bool(credentials.find_one({"username": new_username}))
 
@@ -92,7 +91,6 @@ def change_user_username_in_db(uuid: str, new_username: str) -> bool:
         return False
     
 def add_user_to_reservations_db(uuid: str) -> bool:
-
     try:
         reserved_hours = dict()
         reserved_hours["_id"] = uuid
@@ -103,7 +101,19 @@ def add_user_to_reservations_db(uuid: str) -> bool:
     except Exception as e:
         print(e)
         return False
-    
+
+def delete_user_from_credentials_db(lecturer_uuid: str):
+    result = credentials.delete_one({"_id": lecturer_uuid})
+    return result.deleted_count > 0
+
+def delete_user_from_reservations_db(lecturer_uuid: str):
+    result = reservations.delete_one({"_id": lecturer_uuid})
+    return result.deleted_count > 0
+
+def delete_user_from_lecturers_db(lecturer_uuid: str):
+    result = lecturers.delete_one({"_id": lecturer_uuid})
+    return result.deleted_count > 0
+
 def get_specific_lecturer(lecturer_uuid: str):
     lecturer_uuid = lecturer_uuid.strip()
     found_lecturer = lecturers.find_one({"_id": {"$eq": lecturer_uuid}})

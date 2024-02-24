@@ -127,10 +127,12 @@ def get_specific_lecturer(lecturer_uuid: str):
 @app.route("/api/lecturers/<string:lecturer_uuid>", methods=["DELETE"])
 @requires_auth
 def delete_lecturer(lecturer_uuid):
-    deleted = bool(lecturers.delete_one({"_id": {"$eq": lecturer_uuid}}).deleted_count)
+    success_lecturers = utils.delete_user_from_lecturers_db(lecturer_uuid)
+    success_reservations = utils.delete_user_from_reservations_db(lecturer_uuid)
+    success_credentials = utils.delete_user_from_credentials_db(lecturer_uuid)
 
-    if deleted:
-        return '', 204
+    if success_lecturers and success_reservations and success_credentials:
+        return {"code": 204, "message": "Success"}, 204
     else:
         return {"code": 404, "message": "User not found"}, 404
 
