@@ -75,7 +75,20 @@ def change_user_password_in_db(uuid: str, new_password: str) -> bool:
         return result.modified_count > 0
     
     except pymongo.errors.PyMongoError as e:
-        print(f"Error changing password: {e}")
+        return False
+    
+def change_user_username_in_db(uuid: str, new_username: str) -> bool:
+
+    try:
+        username_exists = bool(credentials.find_one({"username": new_username}))
+
+        if username_exists:
+            return False
+
+        result = credentials.update_one({"_id": uuid}, {"$set": {"username": new_username}})
+        return result.modified_count > 0
+    
+    except pymongo.errors.PyMongoError as e:
         return False
     
 def add_user_to_reservations_db(uuid: str) -> bool:

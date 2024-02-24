@@ -46,5 +46,8 @@ class EditLecturer(BaseModel):
     price_per_hour: Optional[int] = Field(None, ge=0)
     contact: Optional[Contact] = None
 
+    username: Optional[str] = None
+    password: Optional[str] = None
+
     class Config:
         extra = "ignore"

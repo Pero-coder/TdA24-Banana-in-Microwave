@@ -171,6 +171,18 @@ def update_lecturer(lecturer_uuid):
 
             updated_lecturer_json = updated_lecturer_object.model_dump(exclude_none=True)
 
+            # check for credentials change
+            new_username = updated_lecturer_json.get("username")
+            if new_username is not None:
+                utils.change_user_username_in_db(lecturer_uuid, new_username)
+                updated_lecturer_json.pop("username")
+
+            new_password = updated_lecturer_json.get("password")
+            if new_password is not None:
+                utils.change_user_password_in_db(lecturer_uuid, new_password)
+                updated_lecturer_json.pop("password")
+
+
             # Escape unsafe HTML
             updated_lecturer_json = {k: bleach.clean(v, tags=ALLOWED_TAGS, strip=True) if isinstance(v, str) else v for k, v in updated_lecturer_json.items()}
             
