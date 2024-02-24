@@ -63,19 +63,6 @@
                 <label for="hour">Hodina:</label>
                 <select id="hourDropBox">
                     <option value="">Vyberte hodinu</option>
-                    <option value="8">8:00</option>
-                    <option value="9">9:00</option>
-                    <option value="10">10:00</option>
-                    <option value="11">11:00</option>
-                    <option value="12">12:00</option>
-                    <option value="13">13:00</option>
-                    <option value="14">14:00</option>
-                    <option value="15">15:00</option>
-                    <option value="16">16:00</option>
-                    <option value="17">17:00</option>
-                    <option value="18">18:00</option>
-                    <option value="19">19:00</option>
-                    <option value="20">20:00</option>
                 </select>
             </p>
     
@@ -112,6 +99,7 @@
                 event.preventDefault();
             }
             form.reset()
+            getAvailableHours(true)
             dialog.showModal();
         }
 
@@ -178,9 +166,52 @@
             });
         }
 
+        function addOptionToHourDropBox(value, text) {
+            var select = document.getElementById('hourDropBox');
+
+            var option = document.createElement('option');
+            option.value = value;
+            option.text = text;
+            select.add(option);
+        }
+
+        function getAvailableHours(verbose = false){
+            var select = document.getElementById('hourDropBox');
+
+            // remove all options
+            while (select.firstChild) {
+                select.removeChild(select.firstChild);
+            }
+            // add default
+            addOptionToHourDropBox("", "Vyberte hodinu");
+
+            fetch('/api/reservation/{{lecturer_uuid}}')
+                .then(response => {
+                    if (response.status === 200) {
+                        return response.json();
+                    } else {
+                        if(verbose){
+                            alert('Nepovedlo se načíst dostupné hodiny!');
+                        }
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                })
+                .then(data => {
+                    for (let key in data) {
+                        if (data[key]){
+                            // alerady reserved
+                        } else{
+                            addOptionToHourDropBox(key, `${key}:00`);
+                        }
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
         // Add event listeners
         closeButton.addEventListener('click', closeReserveDialog);
         submitButton.addEventListener('click', submitForm);
+        getAvailableHours() // load hours to drop box
     </script>
 </body>
 </html>
