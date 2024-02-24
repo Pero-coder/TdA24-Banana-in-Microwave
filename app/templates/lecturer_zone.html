@@ -251,7 +251,7 @@
             })
             .then(response => {
                 if (!response.ok) {
-                    alert("Něco se nepovedlo!")
+                    alert("Chybné heslo!")
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 return response.json();
