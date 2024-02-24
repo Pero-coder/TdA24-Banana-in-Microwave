@@ -1,5 +1,5 @@
 from app import app, db, utils
-from flask import render_template, request, session, redirect
+from flask import render_template, request, session, redirect, abort
 
 from app.models import NewLecturer, EditLecturer, Tag
 from pydantic import ValidationError
@@ -8,6 +8,9 @@ import uuid
 import json
 from bson import json_util
 import bleach
+from functools import wraps
+from werkzeug.security import check_password_hash, generate_password_hash
+
 
 DEFAULT_RESULTS_COUNT = 20
 
@@ -19,13 +22,35 @@ credentials = db.credentials
 
 ALLOWED_TAGS = ['b', 'i', 'u', 'em', 'strong', 'a']
 
+users = {
+    "TdA": generate_password_hash("d8Ef6!dGG_pv"),
+    "testUser2": generate_password_hash("password2")
+}
+
+def authenticate(username, password):
+    if username in users and check_password_hash(users[username], password):
+        return True
+    return False
+
+def requires_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth = request.authorization
+        if not auth or not authenticate(auth.username, auth.password):
+            abort(401)
+        return f(*args, **kwargs)
+    return decorated
+
+
 
 @app.route("/api")
+@requires_auth
 def api():
     return {"secret":"The cake is a lie"}
 
 
 @app.route("/api/lecturers", methods=["GET", "POST"])
+@requires_auth
 def api_lecturers():
     if request.method == 'POST':
         request_json = request.get_json()
@@ -89,6 +114,7 @@ def api_lecturers():
 
 
 @app.route("/api/lecturers/<string:lecturer_uuid>", methods=["GET"])
+@requires_auth
 def get_specific_lecturer(lecturer_uuid: str):
     found_lecturer = lecturers.find_one({"_id": {"$eq": lecturer_uuid}})
 
@@ -100,6 +126,7 @@ def get_specific_lecturer(lecturer_uuid: str):
 
 
 @app.route("/api/lecturers/<string:lecturer_uuid>", methods=["DELETE"])
+@requires_auth
 def delete_lecturer(lecturer_uuid):
     deleted = bool(lecturers.delete_one({"_id": {"$eq": lecturer_uuid}}).deleted_count)
 
@@ -110,6 +137,7 @@ def delete_lecturer(lecturer_uuid):
 
 
 @app.route("/api/lecturers/<string:lecturer_uuid>", methods=["PUT"])
+@requires_auth
 def update_lecturer(lecturer_uuid):
     lecturer_exists = bool(lecturers.find_one({"_id": {"$eq": lecturer_uuid}}))
 
