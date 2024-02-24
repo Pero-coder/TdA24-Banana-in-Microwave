@@ -43,9 +43,11 @@ def lecturer_login():
         return render_template("lecturer_login.html")
 
     elif request.method == "POST":
+
+        request_json: dict = request.get_json() # {"username": "", "password": ""}
         
-        username: str|None = request.form.get("username")
-        password: str|None = request.form.get("password")
+        username: str|None = request_json.get("username")
+        password: str|None = request_json.get("password")
 
         if username is None or password is None:
             return {"code": 401, "message": "Wrong username or password"}, 401
