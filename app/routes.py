@@ -5,7 +5,7 @@ credentials = db.credentials
 
 @app.route("/lecturer/<string:uuid>")
 def lecturer(uuid: str):
-    lecturer = api.get_specific_lecturer(uuid.strip())
+    lecturer = utils.get_specific_lecturer(uuid)
     if lecturer[1] == 404:
         return lecturer
 
