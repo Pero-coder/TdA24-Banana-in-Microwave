@@ -24,7 +24,7 @@ ALLOWED_TAGS = ['b', 'i', 'u', 'em', 'strong', 'a']
 
 users = {
     "TdA": generate_password_hash("d8Ef6!dGG_pv"),
-    "testUser2": generate_password_hash("password2")
+    "localAPI": generate_password_hash("863ba71ec174153fb80210189118a591")
 }
 
 def authenticate(username, password):
