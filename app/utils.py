@@ -3,6 +3,8 @@ from typing import List, Dict
 import re
 import bcrypt
 import pymongo
+from bson import json_util
+import json
 
 lecturers = db.lecturers
 tags = db.tags
@@ -78,3 +80,13 @@ def add_user_to_reservations_db(uuid: str) -> bool:
     except Exception as e:
         print(e)
         return False
+    
+def get_specific_lecturer(lecturer_uuid: str):
+    lecturer_uuid = lecturer_uuid.strip()
+    found_lecturer = lecturers.find_one({"_id": {"$eq": lecturer_uuid}})
+
+    if found_lecturer is None:
+        return {"code": 404, "message": "User not found"}, 404
+    else:
+        found_lecturer["uuid"] = found_lecturer.pop("_id")
+        return json.loads(json_util.dumps(found_lecturer)), 200

@@ -121,13 +121,7 @@ def api_lecturers():
 @app.route("/api/lecturers/<string:lecturer_uuid>", methods=["GET"])
 @requires_auth
 def get_specific_lecturer(lecturer_uuid: str):
-    found_lecturer = lecturers.find_one({"_id": {"$eq": lecturer_uuid}})
-
-    if found_lecturer is None:
-        return {"code": 404, "message": "User not found"}, 404
-    else:
-        found_lecturer["uuid"] = found_lecturer.pop("_id")
-        return json.loads(json_util.dumps(found_lecturer)), 200
+    return utils.get_specific_lecturer(lecturer_uuid)
 
 
 @app.route("/api/lecturers/<string:lecturer_uuid>", methods=["DELETE"])
