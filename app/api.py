@@ -88,8 +88,7 @@ def api_lecturers():
             new_lecturer_json = {k: bleach.clean(v, tags=ALLOWED_TAGS, strip=True) if isinstance(v, str) else v for k, v in new_lecturer_json.items()}
 
             new_lecturer_json["_id"] = str(uuid.uuid4())
-            lecturers.insert_one(new_lecturer_json)
-
+            
             username = new_lecturer_json.get("username", "").strip()
             password = new_lecturer_json.get("password", "").strip()
 
@@ -98,6 +97,12 @@ def api_lecturers():
 
             utils.add_user_to_reservations_db(new_lecturer_json["_id"])
             utils.add_user_credentials_to_db(new_lecturer_json["_id"], username, password)
+            
+            # remove credentials from public JSON!
+            new_lecturer_json.pop("username")
+            new_lecturer_json.pop("password")
+            lecturers.insert_one(new_lecturer_json)
+
 
             return get_specific_lecturer(new_lecturer_json["_id"])
 
