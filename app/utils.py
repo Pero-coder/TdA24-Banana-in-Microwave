@@ -68,6 +68,16 @@ def add_user_credentials_to_db(uuid: str, username: str, password: str) -> bool:
         print("Username already exists.")
         return False
     
+def change_user_password_in_db(uuid: str, new_password: str) -> bool:
+    hashed_password = hash_password_bcrypt(new_password)
+    try:
+        result = credentials.update_one({"_id": uuid}, {"$set": {"hashed_password": hashed_password}})
+        return result.modified_count > 0
+    
+    except pymongo.errors.PyMongoError as e:
+        print(f"Error changing password: {e}")
+        return False
+    
 def add_user_to_reservations_db(uuid: str) -> bool:
 
     try:

@@ -339,7 +339,7 @@ def reservation_system(lecturer_uuid):
         return {"code": 200, "message": "Success"}, 200
 
     return {"code": 405, "message": "Method not allowed"}, 405
-    
+
 
 # reservation API for lecturers
 @app.route("/api/reservation-admin/", methods=["GET", "POST", "DELETE", "PUT"])
@@ -468,5 +468,47 @@ def reservation_system_admin():
 
         return {"code": 200, "message": "Success"}, 200
 
+
+    return {"code": 405, "message": "Method not allowed"}, 405
+
+
+@app.route("/api/change-password/", methods=["PUT"])
+def change_password():
+
+    # Check login status
+    if not bool(session.get("logged_in")):
+        return redirect("/lecturer-login")
+
+    lecturer_uuid = session.get("lecturer_uuid")
+
+    if lecturer_uuid is None:
+        return {"code": 404, "message": "User not found"}, 404
+
+    uuid_exists = bool(credentials.find_one({"_id": {"$eq": lecturer_uuid}}))
+    if not uuid_exists:
+        return {"code": 404, "message": "User not found"}, 404
+
+
+    if request.method == 'PUT':
+        request_json: Dict = request.get_json() # {"old_password": "", "new_password": ""}
+
+        old_password = request_json.get("old_password")
+        new_password = request_json.get("new_password")
+
+        if old_password == new_password:
+            return {"code": 200, "message": "Passwords are same"}, 200
+        
+        lecturer = credentials.find_one({"_id": {"$eq": lecturer_uuid}})
+        old_hashed_password = lecturer.get("hashed_password")
+
+        if not utils.check_hash_bcrypt(old_password, old_hashed_password):
+            return {"code": 400, "message": "Wrong password!"}, 400
+
+        succesfuly_changed = utils.change_user_password_in_db(lecturer_uuid, new_password)
+
+        if succesfuly_changed:
+            return {"code": 200, "message": "Password change success"}, 200
+        else:
+            return {"code": 400, "message": "Unkown error when changing password"}, 400
 
     return {"code": 405, "message": "Method not allowed"}, 405

@@ -13,11 +13,38 @@
     <label>|</label>
     <a href="/lecturer-logout">Odhlásit se</a>
     <label>|</label>
-    <a href="javascript:void(0)" onclick="alert('Změna hesla')">Změnit heslo</a>
+    <button id="changePwButton">Změnit heslo</button>
 
     <hr>
 
     <h2 style="text-decoration: underline;">Dostupné hodiny:</h2>
+
+    <dialog id="passwordChangeModal">
+        <form id="passwordChangeForm">
+            <h2>Změna hesla:</h2>
+            <p>
+                <label for="current_password">Současné heslo:</label>
+                <input type="password" name="current_password" id="current_password" required>
+            </p>
+    
+            <p>
+                <label for="new_password">Nové heslo:</label>
+                <input type="password" name="new_password" id="new_password" required>
+            </p>
+    
+            <p>
+                <label for="confirm_password">Potvrzení hesla:</label>
+                <input type="password" name="confirm_password" id="confirm_password" required>
+            </p>
+    
+            <div>
+                <button type="submit" id="applyChange">Změnit heslo</button>
+                <button formmethod="dialog" type="submit" id="closeModal">Zavřít</button>
+            </div>
+        </form>
+    </dialog>
+
+
 
     <div>
         <select id="hourDropBox">
@@ -184,6 +211,60 @@
         window.onload = function() {
             loadHours()
         };
+
+        document.getElementById('changePwButton').addEventListener('click', function() {
+            document.getElementById('passwordChangeModal').showModal();
+        });
+
+        document.getElementById('closeModal').addEventListener('click', function(event) {
+            event.preventDefault();
+            document.getElementById('passwordChangeModal').close();
+            document.getElementById('passwordChangeForm').reset();
+        });
+
+        document.getElementById('applyChange').addEventListener('click', function(event) {
+            event.preventDefault();
+
+            var currentPassword = document.getElementById('current_password').value;
+            var newPassword = document.getElementById('new_password').value;
+            var confirmPassword = document.getElementById('confirm_password').value;
+
+            if (currentPassword === '' || newPassword === '' || confirmPassword === ''){
+                alert('Hodnoty nesmí být prázdné!');
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                alert('Kontrolní heslo se neshoduje!');
+                return;
+            }
+
+            fetch('/api/change-password', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    "old_password": currentPassword,
+                    "new_password": newPassword,
+                }),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    alert("Něco se nepovedlo!")
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                alert('Heslo bylo úspěšně změněno.');
+                document.getElementById('passwordChangeModal').close();
+                document.getElementById('passwordChangeForm').reset();
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        });
     </script>
 
 </body>
