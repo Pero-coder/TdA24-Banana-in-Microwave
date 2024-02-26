@@ -37,18 +37,31 @@ def get_max_price():
     return max_price
 
 def is_email_valid(email: str) -> bool:
+    if email is None:
+        return False
+
     # source: https://stackabuse.com/python-validate-email-address-with-regular-expressions-regex/
 
     regex = re.compile(r'([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,})+')
     return bool(re.fullmatch(regex, email))
 
 def is_phone_number_valid(phone_number: str) -> bool:
+    if phone_number is None:
+        return False
+
     # works only without whitespaces
     clean_phone_number = phone_number.replace(' ', '')
     
     regex = re.compile(r'^(?:\+420|\+421)? ?\d{9}$')
     return bool(re.fullmatch(regex, clean_phone_number))
 
+def is_date_valid(date: str) -> bool:
+    if date is None:
+        return False
+    
+    # extremly simple regex (possible 29,30,31 in february)
+    regex = re.compile(r'^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$')
+    return bool(re.fullmatch(regex, date))
 
 def hash_password_bcrypt(password: str) -> str:
     hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
@@ -94,7 +107,7 @@ def add_user_to_reservations_db(uuid: str) -> bool:
     try:
         reserved_hours = dict()
         reserved_hours["_id"] = uuid
-        reserved_hours["teaching_hours"] = { str(hour): {"reserved": False, "client_email": None, "client_phone": None} for hour in range(8, 21) }
+        reserved_hours["teaching_dates"] = {}
         reservations.insert_one(reserved_hours)
         return True
     

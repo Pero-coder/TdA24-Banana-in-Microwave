@@ -59,8 +59,16 @@
     <dialog id="reserveDialogModal">
         <form id="reserveForm">
             <h2>Údaje k rezervaci:</h2>
+
             <p>
-                <label for="hour">Hodina:</label>
+                <label for="dateDropBox">Datum:</label>
+                <select id="dateDropBox">
+                    <option value="">Vyberte datum</option>
+                </select>
+            </p>
+                
+            <p>
+                <label for="hourDropBox">Hodina:</label>
                 <select id="hourDropBox">
                     <option value="">Vyberte hodinu</option>
                 </select>
@@ -92,6 +100,7 @@
 
         var closeButton = document.getElementById('closeModal');
         var submitButton = document.getElementById('submitReserveForm');
+        var dateBox = document.getElementById('dateDropBox');
 
 
         function openReserveDialog(event) {
@@ -99,7 +108,7 @@
                 event.preventDefault();
             }
             form.reset()
-            getAvailableHours(true)
+            getAvailableDates(true)
             dialog.showModal();
         }
 
@@ -115,15 +124,20 @@
         function submitForm(e) {
             e.preventDefault();
 
+            var date = document.getElementById('dateDropBox').value;
             var hour = document.getElementById('hourDropBox').value;
             var email = document.getElementById('email').value;
             var phone = document.getElementById('phone').value;
+
+            if (date == '' || date == null){
+                alert("Musíte vybrat datum!")
+                return
+            }
 
             if (hour == '' || hour == null){
                 alert("Musíte vybrat hodinu!")
                 return
             }
-
             
             if (email == '' || email == null){
                 alert("Musíte zadat email!")
@@ -136,6 +150,7 @@
             }
         
             let data = {
+                date: date,
                 phone: phone,
                 email: email,
                 hour: hour
@@ -175,12 +190,29 @@
             select.add(option);
         }
 
-        function getAvailableHours(verbose = false){
-            var select = document.getElementById('hourDropBox');
+        function addOptionToDateDropBox(value, text) {
+            var select = document.getElementById('dateDropBox');
 
-            // remove all options
-            while (select.firstChild) {
-                select.removeChild(select.firstChild);
+            var option = document.createElement('option');
+            option.value = value;
+            option.text = text;
+            select.add(option);
+        }
+
+        function getAvailableDates(verbose = false){
+            var dateBox = document.getElementById('dateDropBox');
+            var hourBox = document.getElementById('hourDropBox');
+
+            // remove all date options
+            while (dateBox.firstChild) {
+                dateBox.removeChild(dateBox.firstChild);
+            }
+            // add default
+            addOptionToDateDropBox("", "Vyberte datum");
+
+            // remove all hour options
+            while (hourBox.firstChild) {
+                hourBox.removeChild(hourBox.firstChild);
             }
             // add default
             addOptionToHourDropBox("", "Vyberte hodinu");
@@ -191,27 +223,78 @@
                         return response.json();
                     } else {
                         if(verbose){
-                            alert('Nepovedlo se načíst dostupné hodiny!');
+                            alert('Nepovedlo se načíst dostupné datumy a hodiny!');
                         }
                         throw new Error(`HTTP error! status: ${response.status}`);
                     }
                 })
                 .then(data => {
-                    for (let key in data) {
-                        if (data[key]){
-                            // alerady reserved
-                        } else{
-                            addOptionToHourDropBox(key, `${key}:00`);
-                        }
+
+                    for (let date in data){
+                        var parts = date.split("-");
+                        var newDate = parts[2] + "." + parts[1] + "." + parts[0]; // display as "dd.mm.yyyy"
+                        addOptionToDateDropBox(date, newDate);
                     }
+                    
                 })
                 .catch(error => console.error('Error:', error));
+        }
+
+        function getAvailableHours(verbose = false, selectedDate = ""){
+            var hourBox = document.getElementById('hourDropBox');
+
+            // remove all hour options
+            while (hourBox.firstChild) {
+                hourBox.removeChild(hourBox.firstChild);
+            }
+            // add default
+            addOptionToHourDropBox("", "Vyberte hodinu");
+
+
+            if (selectedDate === "" || selectedDate === null){   
+                return;
+            }
+
+            fetch('/api/reservation/{{lecturer_uuid}}')
+                .then(response => {
+                    if (response.status === 200) {
+                        return response.json();
+                    } else {
+                        if(verbose){
+                            alert('Nepovedlo se načíst dostupné datumy a hodiny!');
+                        }
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                })
+                .then(data => {
+
+                    for (let date in data){
+
+                        if (date == selectedDate){
+                            for (let hour in data[date]) {
+                                if (data[date][hour].reserved){
+                                    // alerady reserved
+                                } else{
+                                    addOptionToHourDropBox(hour, `${hour}:00`);
+                                }
+                            }
+                        }
+                    }
+                    
+                    
+                }).catch(error => console.error('Error:', error));
         }
 
         // Add event listeners
         closeButton.addEventListener('click', closeReserveDialog);
         submitButton.addEventListener('click', submitForm);
-        getAvailableHours() // load hours to drop box
+
+        dateDropBox.addEventListener('change', function() {
+            var selectedDate = document.getElementById('dateDropBox').value;
+            getAvailableHours(false, selectedDate);
+        });
+
+        getAvailableDates() // load hours to drop box
     </script>
 </body>
 </html>

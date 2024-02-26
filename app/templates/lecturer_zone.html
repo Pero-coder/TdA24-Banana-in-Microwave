@@ -47,6 +47,7 @@
 
 
     <div>
+        <input type="date" id="dateBox" name="date">
         <select id="hourDropBox">
             <option value="">Vyberte hodinu</option>
             <option value="8">8:00</option>
@@ -62,7 +63,11 @@
             <option value="18">18:00</option>
             <option value="19">19:00</option>
             <option value="20">20:00</option>
+            <option value="ALL">Všechny</option>
         </select>
+
+        <label style="padding-left: 15px;"></label>
+
         <button onclick="enableHour()">Povolit</button>
         <button onclick="disableHour()">Zakázat</button>
         <button onclick="resetHour()">Smazat rezervaci</button>
@@ -74,7 +79,7 @@
 
             function showMessage(message, color){
                 document.getElementById('message_box').innerHTML = message;
-                document.getElementById('message_box').style.backgroundColor = color
+                document.getElementById('message_box').style.backgroundColor = color;
             }
 
             function loadHours() {
@@ -88,19 +93,41 @@
                     }
                 })
                 .then(data => {
+                    // empty json
+                    if (Object.keys(data).length <= 0){
+                        document.getElementById('info').innerHTML = "";
+                        return;
+                    }
+
                     let output = '';
-                    for (let key in data) {
-                        output += `<p>Hodina: ${key}:00</p>`;
-                        output += `<ul>`;
-                        if (data[key].client_email) {
-                        output += `<li>Email klienta: ${data[key].client_email}</li>`;
+
+                    for (let date in data) {
+
+                        var parts = date.split("-");
+                        var newDate = parts[2] + "." + parts[1] + "." + parts[0]; // display as "dd.mm.yyyy"
+
+                        output += `<h2 style="text-decoration: underline;">${newDate}</h2>`;
+                        for (let hour in data[date]){
+                            output += `<p>Hodina: ${hour}:00</p>`;
+                            output += `<ul>`;
+
+                            if(data[date][hour].reserved){
+                                output += `<li>Rezervováno: <span style="background-color: lightgreen">Ano</span></li>`;
+                            } else{
+                                output += `<li>Rezervováno: <span style="background-color: lightcoral;">Ne</span></li>`;
+                            }
+                            
+                            if (data[date][hour].client_email) {
+                                output += `<li>Email klienta: ${data[date][hour].client_email}</li>`;
+                            }
+                            if (data[date][hour].client_phone) {
+                                output += `<li>Telefon klienta: ${data[date][hour].client_phone}</li>`;
+                            }
+                            output += `</ul>`;
+                            output += `<br>`;
                         }
-                        if (data[key].client_phone) {
-                        output += `<li>Telefon klienta: ${data[key].client_phone}</li>`;
-                        }
-                        output += `<li>Rezervováno: ${data[key].reserved ? 'Ano' : 'Ne'}</li>`;
-                        output += `</ul>`;
-                        output += `<br>`;
+
+                        output += `<hr>`;
                     }
                     document.getElementById('info').innerHTML = output;
                 })
@@ -108,10 +135,22 @@
             }
 
             function enableHour() {
+                let date = document.getElementById('dateBox').value;
+                if(date === ""){
+                    alert("Vyberte datum!");
+                    return;
+                }
+
                 let hour = document.getElementById('hourDropBox').value;
                 if (hour === ""){
-                    alert("Vyberte hodinu!")
-                    return
+                    alert("Vyberte hodinu!");
+                    return;
+                }
+                else if (hour === "ALL"){
+                    hours = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
+                }
+                else{
+                    hours = [hour]
                 }
 
                 fetch('/api/reservation-admin/', {
@@ -119,7 +158,8 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({"hour": hour}),
+                    body: JSON.stringify({"date": date, "hours": hours}),
+                    redirect: "manual"
                 })
                 .then(response => {
                     if (response.status === 200) {
@@ -131,17 +171,35 @@
                 })
                 .then(data => {
                     document.getElementById('hourDropBox').selectedIndex = 0
-                    showMessage(`Hodina ${hour}:00 byla přidána do výběru.`, "#ADFF2F")
-                    loadHours()
+                    if (hour === "ALL"){
+                        var parts = date.split("-");
+                        var newDate = parts[2] + "." + parts[1] + "." + parts[0]; // display as "dd.mm.yyyy"
+                        showMessage(`Všechny hodiny z ${newDate} byly přidány do výběru.`, "#ADFF2F");
+                    } else{
+                        showMessage(`Hodina ${hour}:00 byla přidána do výběru.`, "#ADFF2F");
+                    }
+                    loadHours();
                 })
                 .catch((error) => console.error('Error:', error));
             }
 
             function disableHour() {
+                let date = document.getElementById('dateBox').value;
+                if(date === ""){
+                    alert("Vyberte datum!");
+                    return;
+                }
+
                 let hour = document.getElementById('hourDropBox').value;
                 if (hour === ""){
-                    alert("Vyberte hodinu!")
-                    return
+                    alert("Vyberte hodinu!");
+                    return;
+                }
+                else if (hour === "ALL"){
+                    hours = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
+                }
+                else{
+                    hours = [hour]
                 }
 
                 fetch('/api/reservation-admin/', {
@@ -149,7 +207,8 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({"hour": hour}),
+                    body: JSON.stringify({"date": date, "hours": hours}),
+                    redirect: "manual"
                 })
                 .then(response => {
                     if (response.status === 200) {
@@ -161,17 +220,35 @@
                 })
                 .then(data => {
                     document.getElementById('hourDropBox').selectedIndex = 0
-                    showMessage(`Hodina ${hour}:00 byla smazána z výběru.`, "#F08080")
-                    loadHours()
+                    if (hour === "ALL"){
+                        var parts = date.split("-");
+                        var newDate = parts[2] + "." + parts[1] + "." + parts[0]; // display as "dd.mm.yyyy"
+                        showMessage(`Všechny hodiny z ${newDate} byly odebrány z výběru.`, "#F08080");
+                    } else{
+                        showMessage(`Hodina ${hour}:00 byla smazána z výběru.`, "#F08080");
+                    }
+                    loadHours();
                 })
                 .catch((error) => console.error('Error:', error));
             }
 
             function resetHour() {
+                let date = document.getElementById('dateBox').value;
+                if(date === ""){
+                    alert("Vyberte datum!");
+                    return;
+                }
+
                 let hour = document.getElementById('hourDropBox').value;
                 if (hour === ""){
-                    alert("Vyberte hodinu!")
-                    return
+                    alert("Vyberte hodinu!");
+                    return;
+                }
+                else if (hour === "ALL"){
+                    hours = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
+                }
+                else{
+                    hours = [hour]
                 }
 
                 fetch('/api/reservation-admin/', {
@@ -179,20 +256,27 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({"hour": hour}),
+                    body: JSON.stringify({"date": date, "hours": hours}),
+                    redirect: "manual"
                 })
                 .then(response => {
                     if (response.status === 200) {
                         return response.json();
                     } else {
-                        showMessage(`[Chyba] Nepovedlo se resetovat rezervaci!`, "#F08080")
+                        showMessage(`[Chyba] Nepovedlo se resetovat rezervaci!`, "#F08080");
                         throw new Error(`HTTP error! status: ${response.status}`);
                     }
                 })
                 .then(data => {
                     document.getElementById('hourDropBox').selectedIndex = 0
-                    showMessage(`Rezervace u hodiny ${hour}:00 byla vyresetována.`, "#FFA07A")
-                    loadHours()
+                    if (hour === "ALL"){
+                        var parts = date.split("-");
+                        var newDate = parts[2] + "." + parts[1] + "." + parts[0]; // "dd.mm.yyyy"
+                        showMessage(`Všechny hodiny z ${newDate} byly vyresetovány.`, "#FFA07A");
+                    } else{
+                        showMessage(`Rezervace u hodiny ${hour}:00 byla vyresetována.`, "#FFA07A");
+                    }
+                    loadHours();
                 })
                 .catch((error) => console.error('Error:', error));
             }
@@ -209,8 +293,19 @@
 
     <script>
         window.onload = function() {
-            loadHours()
+            loadHours();
+            setCurrentDate();
         };
+
+        function setCurrentDate(){
+            var dateInput = document.getElementById('dateBox');
+            var date = new Date();
+
+            // Format the date in the yyyy-mm-dd format
+            var formattedDate = date.toISOString().substring(0, 10);
+
+            dateInput.value = formattedDate;
+        }
 
         document.getElementById('changePwButton').addEventListener('click', function() {
             document.getElementById('passwordChangeModal').showModal();
@@ -248,6 +343,7 @@
                     "old_password": currentPassword,
                     "new_password": newPassword,
                 }),
+                redirect: "manual"
             })
             .then(response => {
                 if (!response.ok) {
