@@ -1,5 +1,5 @@
 from app import app, db, utils
-from flask import render_template, request, session, redirect, abort
+from flask import render_template, request, session, redirect, abort, Response
 
 from app.models import NewLecturer, EditLecturer, Tag
 from pydantic import ValidationError
@@ -10,7 +10,8 @@ from bson import json_util
 import bleach
 from functools import wraps
 from werkzeug.security import check_password_hash, generate_password_hash
-
+import icalendar
+from datetime import datetime
 
 DEFAULT_RESULTS_COUNT = 20
 
@@ -525,6 +526,73 @@ def reservation_system_admin():
             )
 
         return {"code": 200, "message": "Success"}, 200
+
+
+    return {"code": 405, "message": "Method not allowed"}, 405
+
+# reservation API for lecturers
+@app.route("/api/admin-download-ical/", methods=["GET"])
+def admin_download_ical():
+    # Check login status
+    if not bool(session.get("logged_in")):
+        return redirect("/lecturer-login")
+
+    lecturer_uuid = session.get("lecturer_uuid")
+
+    if lecturer_uuid is None:
+        return {"code": 404, "message": "User not found"}, 404
+
+    uuid_exists = bool(reservations.find_one({"_id": {"$eq": lecturer_uuid}}))
+    if not uuid_exists:
+        return {"code": 404, "message": "User not found"}, 404
+
+
+    if request.method == 'GET':
+        # download .ical with lecturer's reserved hours
+
+        new_cal = icalendar.Calendar()
+        new_cal.add('version', '2.0')
+
+        found_reservations = reservations.find_one({"_id": {"$eq": lecturer_uuid}})
+        teaching_dates = found_reservations.get("teaching_dates", {})
+
+        for teaching_date in teaching_dates:
+            teaching_hours = teaching_dates.get(teaching_date, {})
+
+            for hour in teaching_hours:
+                hour_info = teaching_hours.get(hour, {})
+                reserved = bool(hour_info.get("reserved", False))
+
+                if reserved:
+                    start_hour = int(hour)
+
+                    splitted_start_date = teaching_date.split("-")
+                    start_day = int(splitted_start_date[2])
+                    start_month = int(splitted_start_date[1])
+                    start_year = int(splitted_start_date[0])
+
+                    client_email = hour_info.get("client_email", "")
+                    client_phone = hour_info.get("client_phone", "")
+
+                    event = icalendar.Event()
+                    event.add('summary', 'Doučování')
+                    event.add('description', f'Kontakt na klienta:\n{client_email}\n{client_phone}')
+                    event.add('dtstart', datetime(start_year, start_month, start_day, start_hour, 0, 0))
+                    event.add('dtend', datetime(start_year, start_month, start_day, start_hour+1, 0, 0))
+
+                    # add event to the calendar
+                    new_cal.add_component(event)
+        
+        # count number of events
+        if len(new_cal.walk('VEVENT')) > 0:
+            response = Response(new_cal.to_ical(), mimetype="text/calendar")
+            response.headers.add("Content-Disposition", "attachment", filename="calendar.ics")
+
+            return response, 200
+
+        else:
+            # calendar is empty
+            return "", 200
 
 
     return {"code": 405, "message": "Method not allowed"}, 405

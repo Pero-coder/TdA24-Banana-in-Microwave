@@ -14,6 +14,8 @@
     <a href="/lecturer-logout">Odhlásit se</a>
     <label>|</label>
     <button id="changePwButton">Změnit heslo</button>
+    <label>|</label>
+    <button id="exportCalendarButton">Export do kalendáře</button>
 
     <hr>
 
@@ -359,6 +361,30 @@
             .catch((error) => {
                 console.error('Error:', error);
             });
+        });
+
+        document.getElementById('exportCalendarButton').addEventListener('click', function() {
+            fetch('/api/admin-download-ical')
+                .then(response => response.text())
+                .then(data => {
+                    // create a blob from the data
+                    if (data.trim() === '') {
+                        alert("Žádná data k exportování")
+                        return;
+                    }
+
+                    var blob = new Blob([data], {type: 'text/calendar'});
+                    var url = URL.createObjectURL(blob);
+
+                    // create a link and click it
+                    var a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'calendar_teacher_digital_agency.ics';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                })
+                .catch(error => console.error('Error:', error));
         });
     </script>
 
