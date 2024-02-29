@@ -4,28 +4,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="{{url_for('static', filename='favicon.svg')}}" type="image/svg+xml">
+    <link rel="stylesheet" href="{{url_for('static', filename='login.css')}}">
     <title>Login - Lektorská zóna</title>
 </head>
 <body>
-    <a href="/"><img class="logo" src="{{url_for('static', filename='logo.svg')}}" alt="logo"></a>
+    <div class="navbar">
+        <a href="/"><img class="logo" src="{{url_for('static', filename='logo.svg')}}" alt="logo"></a>
+    </div>
 
-    <div style="text-align: center; padding-top: 20vh;">
+    <div class="login-form">
         <form id="loginForm">
-            <div style="margin-bottom: 10px;">
-                <label for="username">Uživatelské jméno:</label><br>
-                <input type="text" id="username" name="username" required><br>
+            <div>
+                <p>
+                    <label for="username">Uživatelské jméno:</label><br>
+                    <input type="text" id="username" name="username" required><br>
+                </p>
             </div>
 
-            <div style="margin-bottom: 10px;">
-                <label for="password">Heslo:</label><br>
-                <input type="password" id="password" name="password" required><br>
+            <div>
+                <p>
+                    <label for="password">Heslo:</label><br>
+                    <input type="password" id="password" name="password" required><br>
+                </p>
             </div>
 
-            <div style="margin-bottom: 10px;">
-                <input type="submit" value="Přihlásit se">
+            <div>
+                <p>
+                    <input type="submit" value="Přihlásit se">
+                </p>
             </div>
         </form>
     </div>
+    <div class="footer"></div>
 
     <script>
         document.getElementById('loginForm').addEventListener('submit', function(event) {

@@ -21,6 +21,9 @@ p {
 .navbar {
     background-color: #ffffff;
     width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
 }
 
 :modal {
@@ -184,6 +187,24 @@ a {
 
 #filterBtn:hover {
     filter: invert(75%) sepia(87%) saturate(265%) hue-rotate(149deg) brightness(87%) contrast(87%); /* converting svg color to #74C7D3 */
+}
+
+#lecturer-zone-button {
+    background-color: #00384D;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 15px 15px;
+    border-radius: 15px;
+    font-weight: bold;
+}
+
+#lecturer-zone-button:hover {
+    background-color: #74C7D3;
 }
 
 
