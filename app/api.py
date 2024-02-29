@@ -586,7 +586,9 @@ def admin_download_ical():
         # count number of events
         if len(new_cal.walk('VEVENT')) > 0:
             response = Response(new_cal.to_ical(), mimetype="text/calendar")
-            response.headers.add("Content-Disposition", "attachment", filename="calendar.ics")
+
+            filename = datetime.now().strftime('%Y-%m-%d') + '_plan-vyuky.ics'
+            response.headers.add("Content-Disposition", "attachment", filename=filename)
 
             return response, 200
 
