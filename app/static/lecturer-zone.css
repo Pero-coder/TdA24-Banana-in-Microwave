@@ -1,0 +1,133 @@
+@import 'https://fonts.googleapis.com/css?family=Lalezar';
+@import 'https://fonts.googleapis.com/css?family=Open+Sans';
+
+body {
+    background-color: #fafafa;
+    color: #00384D;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: "Lalezar";
+}
+
+p {
+    font-family: "Open Sans";
+}
+
+.navbar {
+    background-color: #ffffff;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+#logout-button {
+    background-color: #00384D;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 15px 15px;
+    border-radius: 15px;
+    font-weight: bold;
+}
+
+#logout-button:hover {
+    background-color: #74C7D3;
+}
+
+button {
+    background-color: #00384D;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    margin: 5px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+button:hover {
+    background-color: #74C7D3;
+    cursor: pointer;
+}
+
+select {
+    padding: 10px;
+    margin: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #f8f8f8;
+    font-size: 16px;
+}
+
+select option {
+    padding: 10px;
+    background-color: #f8f8f8;
+    color: #000;
+}
+
+input[type="date"] {
+    padding: 10px;
+    margin: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #f8f8f8;
+    font-size: 16px;
+}
+
+.welcome {
+    display: flex;
+    flex-direction: row;
+}
+
+.available-lectures {
+    display: flex;
+    flex-direction: column;
+}
+
+.edit-lectures {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+}
+
+:modal {
+    color: #00384D;
+    background-color: #fafafa;
+    border-radius: 20px;
+    padding: 20px;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+input[type="password"] {
+    width: 90%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #f8f8f8;
+    font-size: 16px;
+}
+
+@media screen and (max-width: 1000px) {
+    .welcome {
+        flex-direction: column;
+    }
+
+    .edit-lectures {
+        flex-direction: column;
+    }
+}

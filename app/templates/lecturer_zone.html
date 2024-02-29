@@ -4,38 +4,43 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="{{url_for('static', filename='favicon.svg')}}" type="image/svg+xml">
+    <link rel="stylesheet" href="{{url_for('static', filename='lecturer-zone.css')}}">
     <title>Lektorská zóna</title>
 </head>
 <body>
+    <div class="navbar">
+        <a href="/"><img class="logo" src="{{url_for('static', filename='logo.svg')}}" alt="logo"></a>
+        <a id="logout-button" href="/lecturer-logout"><p>Odhlásit se</p></a>
+    </div>
+
     <h1>Vítejte v lektorské zóně ({{lecturer_firstname}} {{lecturer_lastname}})</h1>
 
-    <a href="/">Hlavní stránka</a>
-    <label>|</label>
-    <a href="/lecturer-logout">Odhlásit se</a>
-    <label>|</label>
-    <button id="changePwButton">Změnit heslo</button>
-    <label>|</label>
-    <button id="exportCalendarButton">Export do kalendáře</button>
-
-    <hr>
-
-    <h2 style="text-decoration: underline;">Dostupné hodiny:</h2>
+    <div class="welcome">
+        <button id="changePwButton">Změnit heslo</button>
+        <button id="exportCalendarButton">Export do kalendáře</button>
+    </div>
 
     <dialog id="passwordChangeModal">
         <form id="passwordChangeForm">
             <h2>Změna hesla:</h2>
             <p>
                 <label for="current_password">Současné heslo:</label>
+            </p>
+            <p>
                 <input type="password" name="current_password" id="current_password" required>
             </p>
     
             <p>
                 <label for="new_password">Nové heslo:</label>
+            </p>
+            <p>
                 <input type="password" name="new_password" id="new_password" required>
             </p>
     
             <p>
                 <label for="confirm_password">Potvrzení hesla:</label>
+            </p>
+            <p>
                 <input type="password" name="confirm_password" id="confirm_password" required>
             </p>
     
@@ -46,34 +51,33 @@
         </form>
     </dialog>
 
+    
+    <div class="available-lectures">
+        <h2>Dostupné hodiny:</h2>
+        <div class="edit-lectures">
+            <input type="date" id="dateBox" name="date">
+            <select id="hourDropBox">
+                <option value="">Vyberte hodinu</option>
+                <option value="8">8:00</option>
+                <option value="9">9:00</option>
+                <option value="10">10:00</option>
+                <option value="11">11:00</option>
+                <option value="12">12:00</option>
+                <option value="13">13:00</option>
+                <option value="14">14:00</option>
+                <option value="15">15:00</option>
+                <option value="16">16:00</option>
+                <option value="17">17:00</option>
+                <option value="18">18:00</option>
+                <option value="19">19:00</option>
+                <option value="20">20:00</option>
+                <option value="ALL">Všechny</option>
+            </select>
 
-
-    <div>
-        <input type="date" id="dateBox" name="date">
-        <select id="hourDropBox">
-            <option value="">Vyberte hodinu</option>
-            <option value="8">8:00</option>
-            <option value="9">9:00</option>
-            <option value="10">10:00</option>
-            <option value="11">11:00</option>
-            <option value="12">12:00</option>
-            <option value="13">13:00</option>
-            <option value="14">14:00</option>
-            <option value="15">15:00</option>
-            <option value="16">16:00</option>
-            <option value="17">17:00</option>
-            <option value="18">18:00</option>
-            <option value="19">19:00</option>
-            <option value="20">20:00</option>
-            <option value="ALL">Všechny</option>
-        </select>
-
-        <label style="padding-left: 15px;"></label>
-
-        <button onclick="enableHour()">Povolit</button>
-        <button onclick="disableHour()">Zakázat</button>
-        <button onclick="resetHour()">Smazat rezervaci</button>
-        
+            <button onclick="enableHour()">Povolit</button>
+            <button onclick="disableHour()">Zakázat</button>
+            <button onclick="resetHour()">Smazat rezervaci</button>
+        </div>
         <script>
             function refreshPage() {
                 location.reload();
@@ -108,7 +112,7 @@
                         var parts = date.split("-");
                         var newDate = parts[2] + "." + parts[1] + "." + parts[0]; // display as "dd.mm.yyyy"
 
-                        output += `<h2 style="text-decoration: underline;">${newDate}</h2>`;
+                        output += `<h2>${newDate}</h2>`;
                         for (let hour in data[date]){
                             output += `<p>Hodina: ${hour}:00</p>`;
                             output += `<ul>`;
