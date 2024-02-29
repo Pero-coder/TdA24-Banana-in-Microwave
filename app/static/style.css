@@ -74,8 +74,8 @@ p {
 .picture img {
     border-radius: 20%;
     object-fit: cover;
-    width: 250px;
-    height: 250px;
+    width: 150px;
+    height: 150px;
     box-shadow: 0px 0px 3px 1.5px rgba(0, 0, 0, 0.5); /* horizontal offset, vertical offset, blur radius, spread radius, color */
 }
 
@@ -97,6 +97,88 @@ p {
     text-align: center;
 }
 
+a {
+    color: inherit;
+    background-color: transparent;
+}
+
+:modal {
+    color: #00384D;
+    background-color: #fafafa;
+    border-radius: 20px;
+    padding: 20px;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+.reservation {
+    text-align: center;
+    margin-top: 15%;
+}
+
+button {
+    background-color: #00384D;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    margin: 5px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+button:hover {
+    background-color: #74C7D3;
+    cursor: pointer;
+}
+
+.reservation button {
+    background-color: #ffffff;
+    border: none;
+    color: #00384D;
+    padding: 15px 32px;
+    margin: 5px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.reservation button:hover {
+    background-color: #f0f0f0;
+}
+
+select {
+    padding: 10px;
+    width: 100%;
+    margin: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #f8f8f8;
+    font-size: 16px;
+}
+
+select option {
+    padding: 10px;
+    background-color: #f8f8f8;
+    color: #000;
+}
+
+input[type="text"], input[type="number"], input[type="date"], input[type="email"], input[type="tel"], input[type="password"], input[type="file"], textarea {
+    padding: 10px;
+    width: 90%;
+    margin: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #f8f8f8;
+    font-size: 16px;
+}
+
 
 
 /* Desktop mode */
@@ -113,5 +195,10 @@ p {
     .content {
         margin-left: 50px;
         margin-right: 50px;
+    }
+
+    .picture img {
+        width: 250px;
+        height: 250px;
     }
 }

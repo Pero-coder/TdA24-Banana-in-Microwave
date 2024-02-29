@@ -27,8 +27,8 @@
                     {% endfor %}
                     
                     
-                    <div style="text-align: center; margin-top: 15%;">
-                        <button onclick="openReserveDialog()" style="font-size: 18px; padding: 7px;">Zarezervovat</button>
+                    <div class="reservation">
+                        <button onclick="openReserveDialog()">Zarezervovat</button>
                     </div>
 
                 </div>
@@ -62,6 +62,8 @@
 
             <p>
                 <label for="dateDropBox">Datum:</label>
+            </p>
+            <p>
                 <select id="dateDropBox">
                     <option value="">Vyberte datum</option>
                 </select>
@@ -69,6 +71,8 @@
                 
             <p>
                 <label for="hourDropBox">Hodina:</label>
+            </p>
+            <p>
                 <select id="hourDropBox">
                     <option value="">Vyberte hodinu</option>
                 </select>
@@ -76,11 +80,15 @@
     
             <p>
                 <label for="email">Email:</label>
+            </p>
+            <p>
                 <input type="email" name="email" id="email" required>
             </p>
     
             <p>
                 <label for="phone">Telefonní číslo:</label>
+            </p>
+            <p>
                 <input type="tel" name="phone" id="phone" required>
             </p>
 
